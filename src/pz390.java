@@ -419,6 +419,10 @@ public class pz390 {
 
 	int psw_amode31 = 0x7fffffff;
 
+    /* psw address fields all 4 bytes long currnetly. */                       // RPI 2001
+    /* Needs to be extended to 8 bytes when amode64 is more fully supported */ // RPI 2001
+    int psw_amode64 = 0xfffffffe;                                              // RPI 2001
+
 	int psw_amode = psw_amode31;
 	int psw_amode24_high_bits = 0xff000000;          // RPI 828
 	int psw_amode31_high_bits = 0;                   // RPI 828
@@ -429,6 +433,11 @@ public class pz390 {
 	int psw_amode31_bit = 0x80000000;
 
 	int psw_amode_bit = psw_amode31_bit;
+
+    int psw_extended_amode64_bit = 1;                      // RPI 1506
+    int psw_extended_amode64_on = 1;                       // RPI 1506
+    int psw_extended_amode64_off = 0;                      // RPI 1506
+    int psw_extended_amode_bit = psw_extended_amode64_off; // RPI 1506
 
 	long cur_stck = 0;
 

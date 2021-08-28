@@ -4679,225 +4679,264 @@ public class vz390 {
 
 
 
-/** The Version 2 zVSAM implementation. */ 
+  /** The Version 2 zVSAM implementation. */ 
 
-   private class V2 implements Generic_VSAM_Handler {  // RPI 1614
+  private class V2 implements Generic_VSAM_Handler {  // RPI 1614
 
-     /* Reference to 'global' object passed in constructor. */
-     pz390 obj_pz390;
+  /* Reference to 'global' object passed in constructor. */
+  pz390 obj_pz390;
   
 
 
 
-     /* ********************************************** */   // RPI 1598
-     /* Anchor points for globals supporting new zVSAM */   // RPI 1598
-     /* ********************************************** */   // RPI 1598
-     private HashMap<Integer, zACB> zACB_map = new HashMap<Integer, zACB>();
+  /* ********************************************** */   // RPI 1598
+  /* Anchor points for globals supporting new zVSAM */   // RPI 1598
+  /* ********************************************** */   // RPI 1598
+  private HashMap<Integer, vzACB> vzACB_map = new HashMap<Integer, vzACB>();
 
-
-
-
-     /**
-     *  EBCDIC equivalent of ACB eyecatcher
-     *
-     *  It is a constant value so is declared final. 
-     *
-     */
-     private        final ebcdicStryng ebcdic_zACB = new ebcdicStryng("zACB", ebcdicStryng.onException.ABNDZ390);
-  
-  
-  
-
-     /**
-     *  This constructor just remarks that very little has been implemented yet.
-     *
-     *  @param parm_pz390 The single instance of the processor class. Needed 
-     *                    for all access to z memory and registers.
-     *
-     <p>
-     *
-     *  The 'global' pz390 object (which is just a single instance of the class
-     *  containing useful routines) is passed to this constructor as a parameter in
-     *  order to decouple this class from the global variable used in the original 
-     *  vz390 initialisation. This has two purposes: (1) it will be simpler later
-     *  to separate this class from what is now the V1 class; and (2) elimination of
-     *  the duplication where the class name (pz390) was also used as the instance
-     *  name. That duplication led to really obscure compilation error messages
-     *  if the name was used where the object was out of scope. HS. RPI 1614.
-     <pre>
-     *  Further explanation in this email to the zVSAM team:  
-     *  Date: Fri, 9 Aug 2019 13:14:46 +0100
-     *  Message-ID: <CAJuTTaFQDdqpD3eF8muBwGRS4DSdRKKXsASdkerk7HiWQ-eKHg@mail.gmail.com>
-     *  Subject: Strange Java error: non-static variable in static context. One case solved.
-     *  From: Hugh Sweeney <hsweeney@pobox.com>
-     </pre>
-     */
-     V2( pz390 parm_pz390 ) {     if (DEVEL) System.out.println("!! vz390.V2: Constructor has been entered.");
-
-       obj_pz390 = parm_pz390;
-
-     }
-
-
-
-
-     /**
-     *  Function to determine if an ACB id is for this zVSAM version.
-     */
-     public byte isValidACB(int acb_addr) { 
-       if (isValidV2ACB(acb_addr)) return (byte) 0;    // valid ACB for this zVSAM version.
-       if (isValidV1ACB(acb_addr)) return (byte) 8;    // looks like an ACB for other zVSAM version.
-       return                             (byte) 4;    // neither of the above.
-     }
+  /**
+  *  EBCDIC equivalent of ACB eyecatcher
+  *
+  *  It is a constant value so is declared final. 
+  *
+  */
+  private final ebcdicStryng ebcdic_zACB = new ebcdicStryng("zACB", ebcdicStryng.onException.ABNDZ390);
   
   
   
   
-     /**
-     *  Select and execute the VSAM access method service requested.
-     *
-     *  @param req The request code, copied from vsam_cur_op.
-     */
-     public void handle_vsam_request(byte req) {
+  /**
+  *  This constructor just remarks that very little has been implemented yet.
+  *
+  *  @param parm_pz390 The single instance of the processor class. Needed 
+  *                    for all access to z memory and registers.
+  *
+  <p>
+  *
+  *  The 'global' pz390 object (which is just a single instance of the class
+  *  containing useful routines) is passed to this constructor as a parameter in
+  *  order to decouple this class from the global variable used in the original 
+  *  vz390 initialisation. This has two purposes: (1) it will be simpler later
+  *  to separate this class from what is now the V1 class; and (2) elimination of
+  *  the duplication where the class name (pz390) was also used as the instance
+  *  name. That duplication led to really obscure compilation error messages
+  *  if the name was used where the object was out of scope. HS. RPI 1614.
+  <pre>
+  *  Further explanation in this email to the zVSAM team:  
+  *  Date: Fri, 9 Aug 2019 13:14:46 +0100
+  *  Message-ID: <CAJuTTaFQDdqpD3eF8muBwGRS4DSdRKKXsASdkerk7HiWQ-eKHg@mail.gmail.com>
+  *  Subject: Strange Java error: non-static variable in static context. One case solved.
+  *  From: Hugh Sweeney <hsweeney@pobox.com>
+  </pre>
+  */
+  V2(pz390 parm_pz390)
+   {if (DEVEL) System.out.println("!! vz390.V2: Constructor has been entered.");
+    obj_pz390 = parm_pz390;
+    }
 
-        // Reg contents used by all methods below.
-        int r0 = obj_pz390.reg.getInt(obj_pz390.r0);
-        int r1 = obj_pz390.reg.getInt(obj_pz390.r1);
 
-        switch (req) {
 
-        case vsam_op_get:                       // GET R1=A(RPL)
-           handle_get_req(r0, r1);
-           break;
 
+  /**
+  *  Function to determine if an ACB id is for this zVSAM version.
+  */
+  public byte isValidACB(int acb_addr)
+   {if (isValidV2ACB(acb_addr)) return (byte) 0;    // valid ACB for this zVSAM version.
+    if (isValidV1ACB(acb_addr)) return (byte) 8;    // looks like an ACB for other zVSAM version.
+    return                             (byte) 4;    // neither of the above.
+    }
+
+
+
+
+  /**
+  *  Select and execute the VSAM access method service requested.
+  *
+  *  @param req The request code, copied from vsam_cur_op.
+  */
+  public void handle_vsam_request(byte req)
+   {int r0;
+    int r1;
+    int r15;
+    
+    try
+     {// Reg contents used by all methods below.
+      r0  = obj_pz390.reg.getInt(obj_pz390.r0);
+      r1  = obj_pz390.reg.getInt(obj_pz390.r1);
+      r15 = 0;
+      
+      switch (req)
+       {case vsam_op_get:                       // GET R1=A(RPL)
+          handle_get_req(r0, r1);
+          break;
         case vsam_op_put:                       // PUT R1=A(RPL)
-           handle_put_req(r0, r1);
-           break;
-
+          handle_put_req(r0, r1);
+          break;
         case vsam_op_erase:                     // ERASE R1=A(RPL)
-           handle_erase_req(r0, r1);
-           break;
-
+          handle_erase_req(r0, r1);
+          break;
         case vsam_op_point:                     // POINT R1=A(RPL)
-           handle_point_req(r0, r1);
-           break;
-
+          handle_point_req(r0, r1);
+          break;
         case vsam_op_open:                      // OPEN R1=A(ACB)
-           handle_open_req(r0, r1);
-           break;
-
+          handle_open_req(r0, r1);
+          break;
         case vsam_op_close:                     // CLOSE R1=A(ACB)
-           handle_close_req(r0, r1);
-           break;
-
+          handle_close_req(r0, r1);
+          break;
         default:
-           obj_pz390.set_psw_check(obj_pz390.psw_pic_oper);
-           throw new RuntimeException("!! vz390.V2 VSAM op ("+ req +") not yet implemented."); 
+          obj_pz390.set_psw_check(obj_pz390.psw_pic_oper);
+          throw new zException("!! vz390.V2 VSAM op ("+ req +") not yet implemented.", 12, 0); 
         }
-     }
+      
+      // Return the correct return code; reason codes are stored into the ACB/RPL by the handler routines
+      obj_pz390.reg.putInt(r15);
+      }
+    
+    // ******************************************************************************************
+    // do not re-raise the exception condition:
+    //    we'll pass back the return and reason codes
+    //    using z/OS conventions described in DFSMS Macro Instructions for Data Sets
+    catch(zException e)
+     {System.out.println("vz390.V2.handle_vsam_request: " + e.toString());
+      r15 = e.getReturnCode(); // ACBerflg cannot be set here: ACB may be invalid!
+      }
+    catch(Exception e)
+     {System.out.println("vz390.V2.handle_vsam_request: " + e.toString());
+      r15 = 8; // ACBerflg cannot be set here: ACB may be invalid!
+      }
+    }
 
 
 
 
-     private void handle_get_req(int op, int parm_rpl) {                  devLog("!! Handler for Get req.");
-        int rpl_addr = parm_rpl;
-        zRPL rpl = new zRPL(op, rpl_addr, obj_pz390.mem);
-        //!! Actual GET logic here
-     }
-
-
-     private void handle_put_req(int op, int parm_rpl) {                  devLog("!! Handler for Put req.");
-        int rpl_addr = parm_rpl;
-        zRPL rpl = new zRPL(op, rpl_addr, obj_pz390.mem);
-        //!! Actual PUT logic here
-     }
-
-
-     private void handle_erase_req(int op, int parm_rpl) {                devLog("!! Handler for Erase req.");
-        int rpl_addr = parm_rpl;
-        zRPL rpl = new zRPL(op, rpl_addr, obj_pz390.mem);
-        //!! Actual ERASE logic here
-     }
-
-
-     private void handle_point_req(int op, int parm_rpl) {                devLog("!! Handler for Point req.");
-        int rpl_addr = parm_rpl;
-        zRPL rpl = new zRPL(op, rpl_addr, obj_pz390.mem);
-        //!! Actual POINT logic here
-     }
+  private void handle_get_req(int op, int parm_rpl)
+   {devLog("!! Handler for Get req.");
+    int rpl_addr = parm_rpl;
+    vzRPL rpl = new vzRPL(obj_pz390.mem.array(), rpl_addr, obj_pz390.tot_mem);
+    //!! Actual GET logic here
+    }
 
 
 
 
-
-     /**
-     *  Validate and execute an Open request
-     *  
-     <pre>
-     *  param  none  (ACB addr is in GPR 1.)  
-     *  return void  (return code in GPR 15 & reason codes set in ACB) 
-     </pre>
-     *  
-     */
-     private void handle_open_req(int parm_alt, int parm_acb) {          devLog("!! .open_acb() has been entered.");
-        cur_acb_addr = parm_acb & obj_pz390.psw_amode;
-        validate_ACB(cur_acb_addr);
-
-        // Validate ACB contents and create shadow ACB
-        zACB TempACB = new zACB(obj_pz390.mem, cur_acb_addr); // RPI 1598
-
-        if (TempACB.last_op_completion_code > 0) { 
-          fail_open(TempACB.last_op_completion_msg);
-          return;     //!! percolate failure status upwards
-          }
-
-        // Find the catalog entry key from the ddname:
-        StringBuilder ddn = new StringBuilder(TempACB.DDNAM());   // Environment variable name (UTF-8)
-        int spaceX = ddn.indexOf(" "); if (spaceX != -1) ddn.setLength(spaceX);      // Trim trailing space.
-        String dsn = System.getenv(ddn.toString());               // Environment variable value.
-        System.out.println("!! DSN: "+ dsn);
-
-        //!!    find in catalog
-        TempACB.open();                             // RPI 1598
-
-        if (TempACB.last_op_completion_code > 0) { 
-          fail_open(TempACB.last_op_completion_msg);
-          return;     //!! percolate failure status upwards
-          }
-
-        // Retain this ACB
-        zACB_map.put(cur_acb_addr, TempACB);   // RPI 1598
-        //!! stats
-     }
+  private void handle_put_req(int op, int parm_rpl)
+   {devLog("!! Handler for Put req.");
+    int rpl_addr = parm_rpl;
+    vzRPL rpl = new vzRPL(obj_pz390.mem.array(), rpl_addr, obj_pz390.tot_mem);
+    //!! Actual PUT logic here
+    }
 
 
 
 
-
-     /**
-     *  Validate and execute a Close request
-     *  
-     <pre>
-     *  param  none  (ACB addr is in GPR 1.)  
-     *  return void  (return & reason codes set in ACB) 
-     </pre>
-     *  
-     */
-     private void handle_close_req(int parm_alt, int parm_acb) {         devLog("!! .close_acb() reached.");
-        cur_acb_addr = parm_acb & obj_pz390.psw_amode;
-        //!!    zACB TempACB = new zACB(cur_acb_addr); // RPI 1598   fetch from map
-        //!!    TempACB.Close();                       // RPI 1598
-        zACB_map.remove(cur_acb_addr);         // RPI 1598
-     }
+  private void handle_erase_req(int op, int parm_rpl)
+   {devLog("!! Handler for Erase req.");
+    int rpl_addr = parm_rpl;
+    vzRPL rpl = new vzRPL(obj_pz390.mem.array(), rpl_addr, obj_pz390.tot_mem);
+    //!! Actual ERASE logic here
+    }
 
 
 
 
+  private void handle_point_req(int op, int parm_rpl)
+   {devLog("!! Handler for Point req.");
+    int rpl_addr = parm_rpl;
+    vzRPL rpl = new vzRPL(obj_pz390.mem.array(), rpl_addr, obj_pz390.tot_mem);
+    //!! Actual POINT logic here
+    }
 
-     private void validate_ACB(int ACB_addr) {
-       if (obj_pz390.mem_byte[ACB_addr] == (byte) 0xA0)       fail_open("!! ACB is for wrong zVSAM version");
-       if (!ebcdic_zACB.equals(obj_pz390.mem_byte, ACB_addr)) fail_open("!! Unrecognisable ACB");
-     }
+
+
+
+  /**
+  *  Validate and execute an Open request
+  *  
+  <pre>
+  *  param  none  (ACB addr is in GPR 1)  
+  *  return void  (return code in GPR 15 & reason code set in ACB) 
+  </pre>
+  *  
+  */
+  private void handle_open_req(int parm_alt, int parm_acb)
+   {vzACB TempACB;
+    
+    try
+     {devLog("!! .open_acb() has been entered.");
+      cur_acb_addr = parm_acb & obj_pz390.psw_amode;
+     
+      // Validate ACB contents and create vzACB (shadow ACB)
+      //
+      // If this fails, the new vzACB is invalid, so the input ACB probably is invalid too
+      // Therefore it is not safe to store the reasoncode in the ACBERFLG field
+      // So any exception raised by the vzACB constructor must percolate to our caller!
+      //
+      TempACB = new vzACB(obj_pz390.mem.array(), cur_acb_addr, obj_pz390.tot_mem);
+      }
+    // ****************************************************************************
+    // vzACB was not created so we cannot set ACBerflg to hold reasoncode
+    // do not issue message - that's done by our caller: handle_vsam_request
+    catch(zException e)
+     {throw new zException(e.getMessage(), e.getReturnCode(), e.getReasonCode());
+      }
+    catch(Exception e)
+     {throw new zException(e.getMessage(), 8, 255); 
+      }
+      
+      
+    try
+     {// Add vzACB to the HashMap - unless it already exists
+      if (!vzACB_map.containsKey(cur_acb_addr))
+          vzACB_map.put(cur_acb_addr, TempACB);
+      
+      // Find the catalog entry key from the ddname:
+      //StringBuilder ddn = new StringBuilder(TempACB.ddnam());   // Environment variable name (UTF-8)
+      //int spaceX = ddn.indexOf(" "); if (spaceX != -1) ddn.setLength(spaceX);      // Trim trailing space.
+      //String dsn = System.getenv(ddn.toString());               // Environment variable value.
+      //System.out.println("!! DSN: "+ dsn);
+      
+      //!!    find in catalog
+      TempACB.open();                             // RPI 1598
+      
+      //if (TempACB.last_op_completion_code > 0) { 
+      //  fail_open(TempACB.last_op_completion_msg);
+      //  return;     //!! percolate failure status upwards
+      //  }
+      }
+      // ****************************************************************************
+      // set ACBERFLG to hold reason code in case an issue occurred.
+      // do not issue message - that's done by our caller: handle_vsam_request
+      catch(zException e)
+       {TempACB.Set_ACBerflg((byte) e.getReasonCode());
+        throw e;
+        }
+      catch(Exception e)
+       {TempACB.Set_ACBerflg((byte) 255);
+        throw new zException(e.getMessage(), 8, 255); 
+        }
+    }
+
+
+
+
+
+  /**
+  *  Validate and execute a Close request
+  *  
+  <pre>
+  *  param  none  (ACB addr is in GPR 1.)  
+  *  return void  (return & reason codes set in ACB) 
+  </pre>
+  *  
+  */
+  private void handle_close_req(int parm_alt, int parm_acb)
+   {devLog("!! .close_acb() reached.");
+    cur_acb_addr = parm_acb & obj_pz390.psw_amode;
+    //!!    zACB TempACB = new zACB(cur_acb_addr); // RPI 1598   fetch from map
+    //!!    TempACB.Close();                       // RPI 1598
+    vzACB_map.remove(cur_acb_addr);         // RPI 1598
+    }
 
 
 
@@ -4905,23 +4944,21 @@ public class vz390 {
      /**
      *  !! Needs lots of details filled in for reason codes etc.
      */
-     private void fail_open(String msg) {
-       //!! Abort is too drastic: obj_......abort_error(97, "!! vz390.v2 "+ msg);
-       // !! Callers of this need to know of failure. Return boolean? 
-     }
+     //private void fail_open(String msg) {
+     //  //!! Abort is too drastic: obj_......abort_error(97, "!! vz390.v2 "+ msg);
+     //  // !! Callers of this need to know of failure. Return boolean? 
+     //}
 
 
 
 
-     /**
-     *  Developer's logging function 
-     */
-     private void devLog(String msg) {
-       if (DEVEL) System.out.println("!! vz390: " + msg);
-     }
-
-
-   } 
+  /**
+  *  Developer's logging function 
+  */
+  private void devLog(String msg)
+   {if (DEVEL) System.out.println("!! vz390: " + msg);
+    }
+  } 
 
 // =========================== End of V2 class. ===========================
 }
