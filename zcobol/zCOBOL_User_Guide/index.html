@@ -16,7 +16,7 @@
     
     
       
-        <title>Mainframe OS compatible macros - z390</title>
+        <title>zCOBOL User Guide - z390</title>
       
     
     
@@ -63,7 +63,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#mainframe-os-compatible-macros" class="md-skip">
+        <a href="#macro-syntax-error" class="md-skip">
           Skip to content
         </a>
       
@@ -106,7 +106,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Mainframe OS compatible macros
+              zCOBOL User Guide
             
           </span>
         </div>
@@ -186,15 +186,13 @@
         
   
   
-    
-  
 
 
   
   
   
     <li class="md-tabs__item">
-      <a href="../install/" class="md-tabs__link md-tabs__link--active">
+      <a href="../../getting_started/install/" class="md-tabs__link">
         Getting started
       </a>
     </li>
@@ -321,14 +319,12 @@
 
   
   
-    
-  
   
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
       
       
       
@@ -351,7 +347,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../install/" class="md-nav__link">
+      <a href="../../getting_started/install/" class="md-nav__link">
         Installation
       </a>
     </li>
@@ -365,7 +361,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../quickstart/" class="md-nav__link">
+      <a href="../../getting_started/quickstart/" class="md-nav__link">
         Quick starts
       </a>
     </li>
@@ -379,7 +375,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../learning/" class="md-nav__link">
+      <a href="../../getting_started/learning/" class="md-nav__link">
         Learning resources
       </a>
     </li>
@@ -391,21 +387,11 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../getting_started/macro_index/" class="md-nav__link">
         Mainframe OS compatible macros
       </a>
-      
     </li>
   
 
@@ -914,257 +900,15 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/z390development/z390/edit/main/doc/getting_started/macro_index.md" title="Edit this page" class="md-content__button md-icon">
+                  <a href="https://github.com/z390development/z390/edit/main/doc/zcobol/zCOBOL_User_Guide.md" title="Edit this page" class="md-content__button md-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
                   </a>
                 
                 
-                <h1 id="mainframe-os-compatible-macros">Mainframe OS compatible macros</h1>
-<p>z390 provides some mainframe OS compatible macros (MVS, Z/OS, VSE) for use in your programs.</p>
-<p>SVC calls are not compatible. Z390 implements its own OS services which are different to the mainframe.</p>
-<p>If your program needs to access OS services, then your programs should use the provided OS based macros.</p>
-<table>
-<thead>
-<tr>
-<th>macro</th>
-<th>description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>ABEND</td>
-<td>abort program with specified code</td>
-</tr>
-<tr>
-<td>ACB</td>
-<td>VSAM access control block</td>
-</tr>
-<tr>
-<td>ACBD<sup id="fnref10:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
-<td>VSAM ACB DSECT</td>
-</tr>
-<tr>
-<td>BLDL</td>
-<td>Search for one or more 390 load modules in memory or in SYS390 load library directories.</td>
-</tr>
-<tr>
-<td>CALL</td>
-<td>Call subroutine using standard linkage</td>
-</tr>
-<tr>
-<td>CHECK</td>
-<td>Check completion of READ/WRITE</td>
-</tr>
-<tr>
-<td>CLOSE</td>
-<td>Close DCB or ACB file</td>
-</tr>
-<tr>
-<td>CMDPROC</td>
-<td>Control command processing tasks</td>
-</tr>
-<tr>
-<td>CVTD</td>
-<td>DSECT of limited CVT fields supported</td>
-</tr>
-<tr>
-<td>DCB</td>
-<td>Data control block for file (supports 31 bit DCBLRECLF field as extension to DCBLRECL.   See SUPERZAP utility for example of how to read or write up to 2 GB file with 1 I/O operation.)</td>
-</tr>
-<tr>
-<td>DCBD</td>
-<td>DSECT of limited DCB fields</td>
-</tr>
-<tr>
-<td>DCBE</td>
-<td>Define EODAD and SYNAD for DCB</td>
-</tr>
-<tr>
-<td>DECBD<sup id="fnref9:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
-<td>DSECT of limited DECB fields</td>
-</tr>
-<tr>
-<td>DEFINE<sup id="fnref8:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
-<td>Define VSAM Cluster Definition Table</td>
-</tr>
-<tr>
-<td>DEQ<sup id="fnref7:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
-<td>Release a resource lock set by ENQ</td>
-</tr>
-<tr>
-<td>DELETE</td>
-<td>Freemain 390 load module if use count 0</td>
-</tr>
-<tr>
-<td>ENQ<sup id="fnref6:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
-<td>request lock on a resource</td>
-</tr>
-<tr>
-<td>ERASE</td>
-<td>VSAM delete record</td>
-</tr>
-<tr>
-<td>ESPIE</td>
-<td>set program interruption handler</td>
-</tr>
-<tr>
-<td>ESTAE</td>
-<td>set program abend handler</td>
-</tr>
-<tr>
-<td>FREEMAIN</td>
-<td>release memory area</td>
-</tr>
-<tr>
-<td>GENCB</td>
-<td>generate VSAM ACB or RPL</td>
-</tr>
-<tr>
-<td>GET</td>
-<td>read record from QSAM or VSAM file</td>
-</tr>
-<tr>
-<td>GETENV</td>
-<td>get value of environment variable</td>
-</tr>
-<tr>
-<td>GETMAIN</td>
-<td>allocate memory area</td>
-</tr>
-<tr>
-<td>IHAEPIE<sup id="fnref5:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
-<td>DSECT for ESPIE exits</td>
-</tr>
-<tr>
-<td>IHASDWA<sup id="fnref4:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
-<td>DSECT for SDWA ESTAE exits                                                                                                                                          m</td>
-</tr>
-<tr>
-<td>LINK</td>
-<td>load and execute 390 load module</td>
-</tr>
-<tr>
-<td>LOAD</td>
-<td>load 390 load module</td>
-</tr>
-<tr>
-<td>MODCB</td>
-<td>modify ACB or RPL control block field</td>
-</tr>
-<tr>
-<td>OPEN</td>
-<td>open DCB or ACB file</td>
-</tr>
-<tr>
-<td>POINT</td>
-<td>position to relative record or RBA in file</td>
-</tr>
-<tr>
-<td>POST</td>
-<td>post ECB as completed</td>
-</tr>
-<tr>
-<td>PUT</td>
-<td>write record to QSAM or VSAM file</td>
-</tr>
-<tr>
-<td>READ</td>
-<td>read block from file at current position</td>
-</tr>
-<tr>
-<td>RETURN</td>
-<td>restore saved registers and return</td>
-</tr>
-<tr>
-<td>RPL</td>
-<td>VSAM request parameter list</td>
-</tr>
-<tr>
-<td>RPLD<sup id="fnref3:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
-<td>VSAM RPL DSECT</td>
-</tr>
-<tr>
-<td>SAVE</td>
-<td>save specified registers</td>
-</tr>
-<tr>
-<td>SETRP<sup id="fnref2:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
-<td>set register options for ESTAE exits</td>
-</tr>
-<tr>
-<td>SHOWCB</td>
-<td>move ACB or RPL field to user area</td>
-</tr>
-<tr>
-<td>SNAP</td>
-<td>dump selected area of memory and/or dump file information from TIOT/DCB’s, general and floating point registers, program information from CDE, and memory allocation totals</td>
-</tr>
-<tr>
-<td>STIMER</td>
-<td>wait specified interval of time</td>
-</tr>
-<tr>
-<td>STORAGE</td>
-<td>obtain or release main storage</td>
-</tr>
-<tr>
-<td>TESTCB</td>
-<td>test current value of ACB or RPL field</td>
-</tr>
-<tr>
-<td>TGET</td>
-<td>read from GUI TN3270 interface</td>
-</tr>
-<tr>
-<td>TIME</td>
-<td>get time and date in requested format</td>
-</tr>
-<tr>
-<td>TTIMER</td>
-<td>test and/or cancel STIMER event</td>
-</tr>
-<tr>
-<td>TPUT</td>
-<td>write to GUI TN3270 display</td>
-</tr>
-<tr>
-<td>VCDTD<sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
-<td>VSAM Catalog Definition Table DSECT</td>
-</tr>
-<tr>
-<td>WAIT</td>
-<td>wait for 1 or more ECB’s to be posted</td>
-</tr>
-<tr>
-<td>WRITE</td>
-<td>write block to file at current position</td>
-</tr>
-<tr>
-<td>WTO</td>
-<td>write text message to operator console</td>
-</tr>
-<tr>
-<td>WTOR</td>
-<td>write to operator with reply</td>
-</tr>
-<tr>
-<td>XCTL</td>
-<td>transfer control and delete prior pgm</td>
-</tr>
-<tr>
-<td>XLATE</td>
-<td>translate area to/from EBCDIC/ASCII</td>
-</tr>
-</tbody>
-</table>
-<div class="footnote">
-<hr />
-<ol>
-<li id="fn:1">
-<p>Requires documentation.&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref3:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref4:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref5:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref6:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref7:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref8:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref9:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref10:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
-</li>
-</ol>
-</div>
+                <h1 id="macro-syntax-error"><em>Macro Syntax Error</em></h1>
+<p><em>Line 194 in Markdown file:</em> <strong>Missing end of comment tag</strong> 
+<div class="highlight"><pre><span></span><code><span class="c1">## Trademarks {#Trademarks}</span>
+</code></pre></div></p>
                 
               
               
@@ -1189,7 +933,7 @@
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../learning/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Learning resources" rel="prev">
+        <a href="../zCOBOL_System_Programmer_Guide/" class="md-footer__link md-footer__link--prev" aria-label="Previous: zCOBOL System Programmer’s Guide" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -1198,26 +942,11 @@
               <span class="md-footer__direction">
                 Previous
               </span>
-              Learning resources
+              zCOBOL System Programmer’s Guide
             </div>
           </div>
         </a>
       
-      
-        
-        <a href="../../user_guide/commands/" class="md-footer__link md-footer__link--next" aria-label="Next: Commands" rel="next">
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              Commands
-            </div>
-          </div>
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
-          </div>
-        </a>
       
     </nav>
   
