@@ -12,7 +12,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-7.3.6">
+      <meta name="generator" content="mkdocs-1.5.1, mkdocs-material-7.3.6">
     
     
       
@@ -1286,34 +1286,38 @@ contain explicit INCLUDE, ENTRY, ALIAS, and NAME commands.  </p>
 <ul>
 <li><code>addr=sdt</code> – set memory value  (i.e. 1r?=x'80' changes mem at (r1) 31 bit</li>
 <li><code>reg=sdt</code> - set register value (i.e. 15r=8 changes reg 15 to 8)</li>
-<li><code>A addr</code> – set or reset up to 100 instruction address stops with hex address or relative expression such as *+4</li>
-<li><code>B=addr</code> - set base for rel addr (ie B=15r% sets base to (r15) 24 bit</li>
-<li><code>D</code> – display DCB file information from TIOT</li>
-<li><code>E</code> – toggle between EBCDIC and ASCII mode</li>
-<li><code>F</code> – display floating point registers F0-FF</li>
-<li><code>G</code> - nn/addr/opcode - exec nn instr. or until specified instruction address or opcode is found with no trace.  One instruction is always executed before next opcode break even if it’s the same instruction such as a BCT 1,<em>.  Addresses are distinguished from count by hex . or relative expression term such as </em>, +, or -.</li>
-<li><code>H</code>  -  list help command summary</li>
+<li><code>A addr</code> – add/remove address stop (ie A FF348. or A *+4 etc.)</li>
+<li><code>AR nn</code> - display specified access register else all AR0-AR15</li>
+<li><code>B=addr</code> - set base for rel addr (i.e. B=15r% sets base to (r15) 24 bit</li>
+<li><code>D</code> – display DCB file status, DDNAME, and DSNAME information</li>
+<li><code>E</code> – toggle EBCDIC/ASCII mode for dumping storage etc.</li>
+<li><code>F nn</code> – display specified floating point registers else all FPR0-FPR15</li>
+<li><code>G</code> - nn/addr/opcode - exec nn instr. or until specified instruction address or opcode is found with no trace. One instruction is always executed before next opcode break even if it’s the same instruction such as a BCT 1,<em>. Addresses are distinguished from count by hex . or relative expression term such as </em>, +, or -.</li>
+<li><code>H</code> - list help command summary</li>
 <li><code>J addr</code> -  jump to new addr and trace instruction</li>
-<li><code>L</code>  - list all regs and trace current instruction</li>
-<li><code>L reg</code> - list contents of register (ie l 1r dumps register 1</li>
+<li><code>L</code> - list all regs and trace current instruction</li>
+<li><code>L reg</code> - list contents of register (i.e. l 1r dumps register 1</li>
 <li><code>L addr len</code> - list contents of memory area (ie l 10. 4 dumps cvt addr</li>
-<li><code>M</code> – display total memory in MB and total allocate and free bytes <ul>
+<li><code>M</code> – display total memory in MB and total allocated and free bytes</li>
 <li><code>P</code> – display current loaded program information from CDE including name, entry and length</li>
+<li><code>PSW</code> - display current PSW</li>
+<li><code>PSW+</code> - display current PSW in verbose mode</li>
+<li><code>PSW16</code> - display 16 byte current PSW</li>
 <li><code>Q</code> - quit execution now</li>
-<li><code>R</code> – display general purpose registers R0-RF</li>
-</ul>
-</li>
-<li><code>S</code>  - clear register, address, and memory breaks</li>
-<li><code>S reg??sdt</code>  - set break on register change</li>
+<li><code>R nn</code> – display specified general purpose register else R0-R15</li>
+<li><code>S</code> - clear register, address, and memory breaks</li>
+<li><code>S reg??sdt</code> - set break on register change</li>
 <li><code>S addr??sdt</code> - set break on memory change</li>
-<li><code>T nn/addr/opcode</code> - trace n instr. or until specified instruction address or opcode is found.  One instruction is always executed before next opcode break even if it’s the same instruction such as a BCT 1,<em>.  Addresses are distinguished from count by hex . or relative expression term such as </em>, +, or -.  The symbol EPA may be used in place of address to refer to last program load point address.</li>
-<li><code>V</code> - validate/verify<ul>
+<li><code>T nn/addr/opcode</code> - trace n instr. or until specified instruction address or opcode is found. One instruction is always executed before next opcode break even if it’s the same instruction such as a BCT 1,<em>. Addresses are distinguished from count by hex . or relative expression term such as </em>, +, or -. The symbol EPA may be used in place of address to refer to last program load point address.</li>
+<li><code>V op1 = op2</code> - validate/verify<ul>
+<li><code>op1</code> - addr len | reg[.+offset] [length] | psw.[cc | mask | amode | key | addr]</li>
+<li><code>op2</code> - addr len | reg[.+offset] [length] | sdt</li>
 <li><code>V * nn</code> - validate nn bytes starting at PSW address</li>
 <li><code>V psw.subfield</code> - validate PSW subfield</li>
 <li><code>V nnr</code> - validate GPR nn</li>
 </ul>
 </li>
-<li><code>Z</code>  - exit test and run to end of program without trace</li>
+<li><code>Z</code>  - run to end of program without trace and exit</li>
 <li><code>* addr</code> = hex.,+-hex, *+-hex, dec, nnr% (24 bit), nnr? (31 bit)</li>
 <li><code>* reg</code> = nnr where nn = 0-15</li>
 <li><code>* sdt</code> = self defining term (b'01',c'ab',f'1',h'2',x'ff')</li>
@@ -1400,7 +1404,7 @@ contain explicit INCLUDE, ENTRY, ALIAS, and NAME commands.  </p>
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top"], "search": "../../../assets/javascripts/workers/search.fcfe8b6d.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": "v1.7.06-239-gccf1e01"}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top"], "search": "../../../assets/javascripts/workers/search.fcfe8b6d.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": "v1.7.06-241-g62218bc"}</script>
     
     
       <script src="../../../assets/javascripts/bundle.b1047164.min.js"></script>
