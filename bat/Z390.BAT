@@ -15,7 +15,7 @@ pushd %~dps0..
 
 if %1. NEQ . goto help
 :continue
-start javaw -jar z390.jar
+start javaw -jar jar\z390.jar
 
 set z_ReturnCode=%ERRORLEVEL%
 :return
