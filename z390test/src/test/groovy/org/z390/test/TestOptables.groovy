@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test
 
 class TestOptables extends z390Test {
 
-    var options = ["stats", "SYSMAC(${basePath("mac")})"]
+    var options = ["stats", "time(45)", "SYSMAC(${basePath("mac")})"]
 
 /* ********************************************************************************************* */
 /*                                                                                               */
