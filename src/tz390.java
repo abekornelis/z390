@@ -343,6 +343,7 @@ public  class  tz390 {
     * 2025-05-03 AFK #615 Correct OPTABLE(ZS8,LIST) output to match HLASM
     * 2025-05-04 AFK #616 Correct OPTABLE(ZS9,LIST) output to match HLASM
     * 2025-05-06 AFK #617 Correct OPTABLE(ZSA,LIST) output to match HLASM
+    * 2025-05-08 AFK #627 Correct OPTABLE(UNI,LIST) output to match HLASM
     ********************************************************
     * Shared z390 tables                  (last RPI)
     *****************************************************/
@@ -3897,7 +3898,13 @@ public void create_opcodes()  // Routine added for RPI 1209
                 }
             process_opcodes(op_table_XA);
             process_opcodes(op_table_ESA);
-            if (opt_optable.equals("DFLT") ||  opt_optable.equals("Z390") ||  opt_allow) process_opcodes(op_table_ESA_allow); // #561
+            if (opt_optable.equals("UNI"))           // #627
+               {process_opcodes(op_table_370_only);  // #627 2377 > 2311
+                process_opcodes(op_table_DOS_370);   // #627 2377 > 2320
+                }                                    // #627
+            else // DFLT or Z390                     //      #627
+               {process_opcodes(op_table_ESA_allow); // #561 #627
+                }                                    //      #627
             process_opcodes(op_table_ZOP);
             process_opcodes(op_table_YOP);
             process_opcodes(op_table_ZS3);
@@ -4682,10 +4689,6 @@ private void check_options(){
                {opt_optable="DFLT";                                                                     // #533
                 }
             }
-    // Suboption LIST for options MACHINE/OPTABLE is disallowed for optable UNI in compatibility mode   // #503
-    if (opt_optable.equals("UNI") && opt_optable_list.equals("LIST") && !opt_allow)                     // #503
-       {abort_error(30,"option LIST for optable UNI only allowed in non-compatibility mode");           // #543
-        }                                                                                               // #503
     // Check vector support parameters RPI VF01
     if (opt_vsectsize != 8
         && opt_vsectsize != 16
