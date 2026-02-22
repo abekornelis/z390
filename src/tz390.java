@@ -897,14 +897,13 @@ public  class  tz390 {
 
 
 
-   /*
-    * Note:  The following big decimal precision
-    *        array used in both az390 and ez390
-    *        should be maintained consistently
+   /**
+    * Note:  The fp_precision big decimal precision
+    *        array is used in both az390 and ez390.
+    *        Should be maintained consistently
     *        as it is used for rounding 
     *        during conversions between types.
-    */
-    /** variable      */ int[]  fp_precision = {
+    */                   int[]  fp_precision = {
                                 fp_db_digits+fp_guard_digits,
                                 fp_dd_digits,  // RPI 790 
                                 fp_dh_digits+fp_guard_digits,
@@ -940,13 +939,12 @@ public  class  tz390 {
 
 
 
-   /* 
+   /**
     * dfp_exp_bcd_to_cf5 returns CF5 5 bit 
-    * combination field using index made up of 
+    * combination field using index made up of
     * high 2 bits of bias exponent
-    * plus 4 bit BCDnibble for first digit. 
-    */
-    /** variable      */ byte[] dfp_exp_bcd_to_cf5 = { // RPI 407 indexed by high 2 bits of exp + fisrt digit
+    * plus 4 bit BCDnibble for first digit.
+    */                   byte[] dfp_exp_bcd_to_cf5 = { // RPI 407 indexed by high 2 bits of exp + fisrt digit
                                 0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0,0,0,0,0,0, //0d
                                 0x08,0x09,0x0A,0x0B,0x0C,0x0D,0x0E,0x0F,0x1A,0x1B,0,0,0,0,0,0, //1d
                                 0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x1C,0x1D,0,0,0,0,0,0, //2d
@@ -954,11 +952,10 @@ public  class  tz390 {
 
 
 
-   /*
+   /**
     * dfp_bcd_to_dpd returns 10 bit densely
     * packed decimal indexed by 3 digit value 0-999
-    */
-    /** variable      */ int[] dfp_bcd_to_dpd = {
+    */                   int[] dfp_bcd_to_dpd = {
                                0x000,0x001,0x002,0x003,0x004,0x005,0x006,0x007,0x008,0x009,
                                0x010,0x011,0x012,0x013,0x014,0x015,0x016,0x017,0x018,0x019,
                                0x020,0x021,0x022,0x023,0x024,0x025,0x026,0x027,0x028,0x029,
@@ -1063,11 +1060,10 @@ public  class  tz390 {
 
 
 
-   /*
+   /**
     * dfp_cf5_to_exp2 returns 2 high bits of
     * biased exponent indexed by 5 bit combined field
-    */
-    /** variable      */ int[] dfp_cf5_to_exp2 = {
+    */                   int[] dfp_cf5_to_exp2 = {
                                0,0,0,0,0,0,0,0,  // 0- 7 = 0
                                1,1,1,1,1,1,1,1,  // 8-15 = 1
                                2,2,2,2,2,2,2,2,  //16-23 = 2
@@ -1079,11 +1075,10 @@ public  class  tz390 {
 
 
 
-   /*
+   /**
     * dfp_cf5_to_bcd returns decimal digit 0-9
     * indexed by 5 bit combination field value
-    */
-    /** variable      */ long[] dfp_cf5_to_bcd = { //cf5 value
+    */                   long[] dfp_cf5_to_bcd = { //cf5 value
                                 0,1,2,3,4,5,6,7,  //00-07
                                 0,1,2,3,4,5,6,7,  //08-0F
                                 0,1,2,3,4,5,6,7,  //10-17
@@ -1094,17 +1089,16 @@ public  class  tz390 {
 
 
 
-   /*
+   /**
     * dfp_dpd_to_bcd returns 3 digit decimal
     * value 0-999 using 10 bit densely packed
     * decimal index value.
     * Notes:
-    *   1. Redundent values in (...)
-    *   2. Java interprets leading 08 as
-    *      octal number like 0x is hex so
-    *      any leading 0's should be removed,
-    */
-    /** variable      */ long[] dfp_dpd_to_bcd = {
+    * <ol>
+    *  <li>Redundent values in (...)</li>
+    *  <li>Java interprets leading 08 as octal number like 0x is hex so any leading 0's should be removed</li>
+    * </ol>
+    */                   long[] dfp_dpd_to_bcd = {
                                   0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 80, 81,800,801,880,881,    // 00
                                  10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 90, 91,810,811,890,891,    // 01
                                  20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 82, 83,820,821,808,809,    // 02
@@ -1191,7 +1185,12 @@ public  class  tz390 {
     /** variable      */ String[] optable_option_id = null;                    // #503
     /** variable      */ String[] optables_optable = null; // optable's optable// #503
 
-    /** variable      */ static final String[] optable_optable_equivalence =   // #503 #631
+    /** 
+     * variable optable_optable_equivalence defines the primary optables and the secondaries.
+     * The secondaries are connected to a primary (which is named after the = sign.
+     * The primaries are defined by specifying the same identifier before and after the = sign.
+     * The numeric values used internally are defined in ArchLevel.java
+     */                  static final String[] optable_optable_equivalence =   // #503 #631
                                      {""+Integer.toString(ArchLevel.ARCH_360_20.getValue())+":360-20=360-20", // #543 #554 #656
                                       ""+Integer.toString(ArchLevel.ARCH_DOS.getValue())   +":DOS=DOS",       // #503 #554 #656
                                       ""+Integer.toString(ArchLevel.ARCH_370.getValue())   +":370=370",       // #503 #554 #656
@@ -1229,7 +1228,12 @@ public  class  tz390 {
     /** variable      */ int[]    machine_option_nr = null;                    // #568
     /** variable      */ String[] machine_option_id = null;                    // #503
     /** variable      */ String[] machines_optable = null; // machine's optable// #503
-    /** variable      */ static final String[] machine_optable_equivalence =   // #503 #631
+    /** 
+     * variable machine_optable_equivalence defines all allowable values for the MACHINE option
+     * and equates each MACHINE option to its equivalent primary OPTABLE option.
+     * The equivalence defintions use the logical names, as defined in optable_optable_equivalence.
+     * The internal optable codes are restricted to the ArchLevel.java module.
+     */                  static final String[] machine_optable_equivalence =   // #503 #631
                                      {"S360-20=360-20",                        // #543
                                       "S370=370",                              // #503
                                       "S370XA=XA",                             // #503
@@ -1334,7 +1338,7 @@ public  class  tz390 {
 
 
    /**
-    * The opcode_formats table below defines all opcode formats and their lengths.
+    * The opcode_formats table defines all opcode formats and their lengths.
     * The format of the definitions is as follows:<br />
     * formatname[$variant],length:operand_list[,object_format]<br />
     * <ul>
@@ -1490,7 +1494,7 @@ public  class  tz390 {
          };
 
    /**
-    * Following table has the instructions that are supported for both DOS and the S360/20
+    * table op_table_360_20 has the instructions that are supported for both DOS and the S360/20
     * as defined in publication A26-5847-3 IBM System 360 Model 20 Functional Characteristics
     *        and in publication A22-6821-7 IBM System 360 Principles of Operation
     */
@@ -1529,7 +1533,7 @@ public  class  tz390 {
          };                         // #543                                          #543
 
    /**
-    * Following table defines five instructions unique to the S360/20
+    * table op_table_360_20_only defines five instructions unique to the S360/20
     * and two that share syntax (but not semantics) with 370
     * The difference in semantics make for their definition
     * here, which is okay since S360/20 and 370 cannot be
@@ -1546,7 +1550,7 @@ public  class  tz390 {
          };                         //                                               #543
 
    /**
-    * Following table has the directives that are supported for both DOS and the S360/20<br />
+    * table op_table_360_20_directives has the directives that are supported for both DOS and the S360/20<br />
     * Incompatibilites:
     * <ol>
     *  <li>GBLx/LCLx not supported for S360/20:
@@ -1592,7 +1596,7 @@ public  class  tz390 {
          };             //                                               #543
 
    /** 
-    * Following table defines two directives unique to the S360/20<br />
+    * table op_table_360_20_only_directives defines two directives unique to the S360/20<br />
     * Incompatibilites:
     * <ol>
     *  <li>DCCW aligns on halfword, but we align on Fullword</li>
@@ -1605,7 +1609,7 @@ public  class  tz390 {
          };             //                                               #543
 
    /** 
-    * op_table_DOS below contains the instructions NOT shared with S360/20.
+    * op_table_DOS contains the instructions NOT shared with S360/20.
     * as defined in publication A26-5847-3 IBM System 360 Model 20 Functional Characteristics
     *        and in publication A22-6821-7 IBM System 360 Principles of Operation
     */
@@ -1752,7 +1756,7 @@ public  class  tz390 {
          };
 
    /**
-    * op_table_DOS below contains the instructions valid from S360-S370
+    * op_table_DOS_370 contains the instructions valid from S360-S370
     * as defined in publication GA22-7000-4 IBM System 370 Principles of Operation
     */
     static final String[]   op_table_DOS_370 =                                      //   #543 #631
@@ -1772,7 +1776,7 @@ public  class  tz390 {
          };                                                               // #543
 
    /**
-    * op_table_DOS_directives below contains the directives NOT shared with S360/20
+    * op_table_DOS_directives contains the directives NOT shared with S360/20
     */
     static final String[]   op_table_DOS_directives = // Table added for RPI 1209A #631
         {"--=ACTR,201,--",       //   7600         "ACTR"           201  
@@ -1791,7 +1795,7 @@ public  class  tz390 {
          };
 
    /**
-    * op_table_vector below contains the instructions for the old vector facility
+    * op_table_vector contains the instructions for the old vector facility
     * as defined in publication SA22-7125-3 ESA370 Vector Operations
     *        and in publication SA22-7207-00 ESA390 Vector Operations<br />
     * The (optional) vector facility was available in addition to the 370 and 390 architectures
@@ -1995,7 +1999,7 @@ public  class  tz390 {
          };
 
    /**
-    * op_table_370 below contains the instructions valid from S370
+    * op_table_370 contains the instructions valid from S370
     * as defined in publication GA22-7000-4 IBM System 370 Principles of Operation
     */
     static final String[]   op_table_370 =   // Table added for RPI 1209A #631
@@ -2026,7 +2030,7 @@ public  class  tz390 {
          };
 
    /**
-    * Instructions for optable 370 only
+    * Instruction definitions for optable 370 only
     */
     static final String[]   op_table_370_only = // Instructions for optable 370 only   #543 #631
         {"9C02=RIO,7,70",        //        "9C02"  "RIO"      "S"     7 // #543
@@ -2067,8 +2071,8 @@ public  class  tz390 {
          };
 
    /**
-    * op_table_XA below contains the instructions valid from S370-XA
-    * as defined in publication (unknown)
+    * op_table_XA contains the instructions valid from S370-XA
+    * as defined in publication (IBM publication code unknown)
     */
     static final String[]   op_table_XA =    // Table added for RPI 1209A #631
         {"0102=UPT,1,10",        //     20 "0102"  "UPT"      "E"     1
@@ -2097,7 +2101,7 @@ public  class  tz390 {
          };
 
    /**
-    * op_table_ESA below contains the instructions valid from S390
+    * op_table_ESA contains the instructions valid from S390
     * as defined in publication SA22-7201-08 ESA390 Principles of Operation
     */
     static final String[]   op_table_ESA =   // Table added for RPI 1209A #631
@@ -2323,6 +2327,7 @@ public  class  tz390 {
     * Instructions PGIN and PGOUT were introduced with the ESA architecture.
     * But HLASM has never supported these instructions
     * See Jonathan Scott's contribution to the ASSEMBLER-LIST 2024-04-06
+    * z390 supports assembly (but not execution) of these instructions in allow mode only.
     */
     static final String[]   op_table_ESA_allow =   // Instructions defined for ESA but never supported by HLASM #561 #631
         {"B22E=PGIN,14,140",     //   2860 "B22E"  "PGIN"     "RRE"  14 #561
@@ -2330,7 +2335,7 @@ public  class  tz390 {
          };                                                          // #561
 
    /**
-    * op_table_ZOP below contains the instructions valid from z Architecture
+    * op_table_ZOP contains the instructions valid from z Architecture
     * as defined in publication SA22-7832-00 zArchitecture Principles of Operation
     *           and publication SA22-7832-01 zArchitecture Principles of Operation
     */
@@ -2496,7 +2501,7 @@ public  class  tz390 {
          };
 
    /**
-    * op_table_YOP below contains the instructions valid from z Architecture
+    * op_table_YOP contains the instructions valid from z Architecture
     * as defined in publication SA22-7832-02 zArchitecture Principles of Operation
     *           and publication SA22-7832-03 zArchitecture Principles of Operation
     */
@@ -2582,7 +2587,7 @@ public  class  tz390 {
          };                               //                                         // #661
 
    /**
-    * op_table_Z9 below contains the instructions valid from z Architecture
+    * op_table_Z9 contains the instructions valid from z Architecture
     * as defined in publication SA22-7832-04 zArchitecture Principles of Operation
     *           and publication SA22-7832-05 zArchitecture Principles of Operation
     */
@@ -2707,7 +2712,7 @@ public  class  tz390 {
          };
 
    /**
-    * op_table_Z10 below contains the instructions valid from z Architecture
+    * op_table_Z10 contains the instructions valid from z Architecture
     * as defined in publication SA22-7832-06 zArchitecture Principles of Operation
     *           and publication SA22-7832-07 zArchitecture Principles of Operation
     */
@@ -2832,7 +2837,7 @@ public  class  tz390 {
          };
 
    /**
-    * op_table_Z11 below contains the instructions valid from z Architecture
+    * op_table_Z11 contains the instructions valid from z Architecture
     * as defined in publication SA22-7832-08 zArchitecture Principles of Operation
     */
     static final String[]   op_table_Z11 =   // table added for Principles of operation SA22-7832-08 #612 #631
@@ -3003,7 +3008,7 @@ public  class  tz390 {
          };                               //                                               #612
 
    /**
-    * op_table_Z12 below contains the instructions valid from z Architecture
+    * op_table_Z12 contains the instructions valid from z Architecture
     * as defined in publication SA22-7832-09 zArchitecture Principles of Operation
     */
     static final String[]   op_table_Z12 =            // #613 #631
@@ -3038,7 +3043,7 @@ public  class  tz390 {
          };                               //                                               #613
 
    /**
-    * op_table_Z13 below contains the instructions valid from z Architecture
+    * op_table_Z13 contains the instructions valid from z Architecture
     * as defined in publication SA22-7832-10 zArchitecture Principles of Operation
     */
     static final String[]   op_table_Z13 =              // #614                                     #631
@@ -3356,7 +3361,7 @@ public  class  tz390 {
          };                                 // #614
 
    /**
-    * op_table_Z14 below contains the instructions valid from z Architecture
+    * op_table_Z14 contains the instructions valid from z Architecture
     * as defined in publication SA22-7832-11 zArchitecture Principles of Operation
     */
     static final String[]   op_table_Z14 =              // #614 #631
@@ -3497,7 +3502,7 @@ public  class  tz390 {
          };                                 // #661
 
    /**
-    * op_table_Z15 below contains the instructions valid from z Architecture
+    * op_table_Z15 contains the instructions valid from z Architecture
     * as defined in publication SA22-7832-12 zArchitecture Principles of Operation
     */
     static final String[]   op_table_Z15 =   //  dsh table added for RPI 2202 #631
@@ -3568,7 +3573,7 @@ public  class  tz390 {
          };
 
    /**
-    * op_table_Z16 below contains the instructions valid from z Architecture
+    * op_table_Z16 contains the instructions valid from z Architecture
     * as defined in publication SA22-7832-13 zArchitecture Principles of Operation
     */
     static final String[] op_table_Z16 =                 // #503 #631
@@ -3603,7 +3608,7 @@ public  class  tz390 {
          };                                  // #503
 
    /**
-    * op_table_Z17 below contains the instructions valid from z Architecture
+    * op_table_Z17 contains the instructions valid from z Architecture
     * as defined in publication SA22-7832-14 zArchitecture Principles of Operation
     */
     static final String[] op_table_Z17 =    // #661
