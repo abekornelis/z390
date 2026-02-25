@@ -694,7 +694,7 @@ public  class  tz390 {
      * ASCII and EBCDIC printable character tables
      */
     /** variable      */ String ascii_min_char =  // RPI 1069
-                           " 01234567890" // blank and didgits
+                           " 01234567890" // blank and digits
                          + "ABCDEFGHIJKLMNOPQRSTUVWXYZ" // uppercase
                          + "abcdefghijklmnopqrstuvwxyz" // lower case
                          + "@#$" // additional leading symbol characters
@@ -6220,12 +6220,12 @@ public boolean update_key_index(int user_key){
 
 /**
  * <ol>
- * <li> Strip long spacey name quotes if found from path and file. </li>
- * <li> Replace . and ..\ with current directory  RPI 866 </li>
- * <li> Check for overriding path in filename and ignore default path RPI 866 </li>
- * <li> Check for overriding filename in path and ignore default filename RPI 866 </li>
- * <li> Add directory, name, and/or type if not specified   </li>
- * <li> Replace \ with / if Linux </li>
+ * <li> Strip quotes if found from path and file.</li>
+ * <li> Replace . and ..\ with current directory</li>
+ * <li> Check for overriding path in filename and ignore default path</li>
+ * <li> Check for overriding filename in path and ignore default filename</li>
+ * <li> Add directory, name, and/or type if not specified</li>
+ * <li> Replace \ with / if Linux</li>
  * </ol>
  * @param file_dir - relative or absolute path
  * @param file_name - file name
@@ -6859,7 +6859,7 @@ private void init_pad_spaces(int new_pad_len){
 
 
 /**
- * return string with text dupicated
+ * return string with text duplicated
  * dup_count times
  * @param text - input text to be duplicated
  * @param dup_count - nr of duplications to produce
