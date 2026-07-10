@@ -20,7 +20,7 @@ call bat\BLDDIST.BAT %z_TraceMode% %*           || goto error
 call bat\IVP.BAT     %z_TraceMode% %*           || goto error
 
 rem run the tests - include the optional tests only when *All is in effect
-if /I %1. == *All. (set opt=optionalTest) else (set opt=)
+if /I %1. == *All. (set opt=cleanOptionalTest optionalTest) else (set opt=)
 call z390test\gradlew.bat -p z390test cleanTest test %opt% || goto error
 
 rem if NIST was specified, it must be followed by the NIST repository's path
