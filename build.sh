@@ -9,8 +9,8 @@ bash/ivp
 # delete results output file
 rm -f ./z390test/build/z390test-output.txt
 # run the tests
-z390test/gradlew -p z390test cleanTest
-z390test/gradlew -p z390test test
 if [ "$(echo "$1" | tr '[:upper:]' '[:lower:]')" = "*all" ]; then
-  z390test/gradlew -p z390test optionalTest
+  z390test/gradlew -p z390test cleanTest test optionalTest
+else
+  z390test/gradlew -p z390test cleanTest test
 fi
