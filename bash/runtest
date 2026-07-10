@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# runtest: run a regression test using gradle
+
+# Optional trace mode (parity with bat\RUNTEST.BAT tron/troff)
+if [ "$1" = "tron" ]; then
+  set -x
+  shift
+elif [ "$1" = "troff" ]; then
+  set +x
+  shift
+fi
+
+# switch to z390test folder
+cd "$(dirname "$0")/../z390test"
+
+# Select test procedure: test or optionalTest
+testproc=test
+if [ -n "$1" ] && [ "$1" = "RunMfAcc" ]; then
+  testproc=optionalTest
+fi
+
+# execute the tests
+if [ $# -eq 0 ]; then
+  ./gradlew "$testproc" --rerun
+else
+  ./gradlew "$testproc" --rerun --tests "$@"
+fi
+
+exit $?

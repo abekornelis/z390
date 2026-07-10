@@ -12,8 +12,11 @@ set /A z_NestLevel=%z_NestLevel%+1
 rem ----- Lvl(%z_NestLevel%) Start %0 %1 %2 %3 %4 %5 %6 %7 %8 %9
 pushd %~dps0..\z390test
 
-if %1. == . (call gradlew test --rerun
-     ) else (call gradlew test --rerun --tests %1 %2 %3 %4 %5 %6 %7 %8 %9
+set testproc=test
+if /I %1. == RunMfAcc. set testproc=optionalTest
+
+if %1. == . (call gradlew %testproc% --rerun
+     ) else (call gradlew %testproc% --rerun --tests %1 %2 %3 %4 %5 %6 %7 %8 %9
              )
 set z_ReturnCode=%ERRORLEVEL%
 

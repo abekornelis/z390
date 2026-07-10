@@ -5,7 +5,9 @@ import org.junit.jupiter.api.TestFactory
 import org.junit.jupiter.api.Test
 
 import static org.junit.jupiter.api.DynamicTest.dynamicTest
+import org.junit.jupiter.api.Tag
 
+@Tag("optional")
 class RunMfAcc extends z390Test{
 
     /** Helper for SNAP comparison: True for SNAP header lines. */
