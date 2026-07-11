@@ -18,7 +18,7 @@ cd "$(dirname "$0")/../z390test"
 testproc=test
 if [ -n "$1" ]; then
   groovy_file="src/test/groovy/org/z390/test/${1}.groovy"
-  if [ -f "$groovy_file" ] && grep -qE '@Tag("optional")' "$groovy_file"; then
+  if [ -f "$groovy_file" ] && grep -qF '@Tag("optional")' "$groovy_file"; then
     testproc=optionalTest
   fi
 fi
