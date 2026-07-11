@@ -74,7 +74,7 @@ See `RunMfAcc.groovy` for an example.
 Optional test script must be encoded explicitly in the `bat\RUNTEST.BAT`
 and the `bash/runtest` scripts because they require a slightly different invocation.
 
-Optional test cases are skipped when running a build procudere,
+Optional test cases are skipped when running a build procedure,
 but included when the `*All` parameter is added.
 
 ## Methods for testing
@@ -100,8 +100,9 @@ Methods available :
 - asml - Assemble and link. Any non zero RC on assemble will exit with RC
 - asmlg - Assemble, link and go. Any non zero RC on assemble and link will exit with RC
 - mz390 - Assemble only
-- cblc - COBOL compile only
-- cblclg - COBOL compile, link and go. Any non-zero return will exist with RC
+- cblc - zCOBOL compile only
+- cblcl - zCOBOL compile and link. Any non zero RC on assemble will exit with RC
+- cblclg - zCOBOL compile, link and go. Any non-zero return will exist with RC
 - lz390 - Link only. Output not cleared prior to run
 - ez390 - Run only. Output not cleared prior to run
 
