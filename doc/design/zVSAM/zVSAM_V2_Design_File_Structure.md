@@ -330,41 +330,55 @@ An ESDS consists of a Prefix block and a Spacemap block followed by Data blocks 
 When the file grows additional Spacemap blocks are added when needed. Not only block transitions, but also
 the presence of additional Spacemap blocks cause gaps in the XLRA sequence.
 
+Segment blocks and Free blocks are not required, but may be present in the file.
+
 ![Diagram showing Blocks in an ESDS](img/zVSAM_V2_File_ESDS.jpg)
 
 ### KSDS Data Organization
 
-> [!NOTE]
-> this paragraph still needs to be created, including a drawing.
+A KSDS data component consists of a Prefix block and a Spacemap block followed by Data blocks and Segment blocks as needed.
+When the file grows additional Spacemap blocks are added when needed. Not only block transitions, but also
+the presence of additional Spacemap blocks cause gaps in the XLRA sequence.
+
+Segment blocks and Free blocks are not required, but may be present in the file.
+
+![Diagram showing Blocks in an ESDS Data component](img/zVSAM_V2_File_ESDS_Data.jpg)
 
 ### KSDS Index Organization
 
-The index component of a KSDS contains index entries, which consist of
-a primary key and its XLRA. The index is organized in a hierarchy of index levels.
+A KSDS index component consists of a Prefix block and a Spacemap block followed by Index blocks.
+When the file grows additional Spacemap blocks are added when needed.
+
+Free blocks are not required, but may be present in the file.
+
+![Diagram showing Blocks in an ESDS Index component](img/zVSAM_V2_File_ESDS_Index.jpg)
 
 #### Index Blocks
 
-Each index Block has an RPTR area, allocate right after the Block Header.
-In addition to the offset, the RPTR contains flags to identify the type and status of each record.
+The index blocks of a KSDS index component contain index entries, which consist of
+a primary key and its XLRA. The index is organized in a hierarchy of index levels.
+
+Each index Block has an RPTR area, allocated right after the Block Header.
+Eazch RPTR entry contains an in-block offset to the record.
+Additionally, the RPTR contains flags to identify the type and status of each record.
 `RPTR_END` marks the end of record pointers in this block.
 
-The records are placed in reverse order in the block to consolidate free space at the centre.
+The records are allocated from the end of the block downwards to consolidate free space at the centre.
 
-For Level 0 each record is the key (KSDS), XRBA (ESDS) or RRN (RRDS) and is followed by an XLRA.
-The XLRA is a record pointer to the Data block.
+For Level 0 each record is the key (KSDS), or RRN (RRDS) of the base record and is followed by an XLRA.
+The XLRA is a record pointer that is valid for the cluster's Data component.
 
-For other levels, each record pointer is the highest key, XRBA or RRN followed by an XLRA.
-The XLRA is a block pointer to the previous level.
+For other levels, each record pointer is the highest key or RRN followed by an XLRA.
+These XLRAs are block pointers that are valid for the cluster's Inex component.
 
 As each index record is a fixed size it is recommended to specify `INDEXADJUST=YES` to avoid unusable
 free space
-
 
 #### Index Block Structure: Single level
 
 This example shows an index of only one block, holding two record pointers
 
-![Diagram showing layout of a Chain of 1 Index Block](img/zVSAM_V2_Drawing_Chain_Index_Blocks_1.jpg)
+![Diagram showing layout of a Chain of 1 Index Block](img/zVSAM_V2_Chain_Index_Blocks_1.jpg)
 
 #### Index Block Structure: Two Levels
 
