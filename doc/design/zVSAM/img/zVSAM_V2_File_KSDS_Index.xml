@@ -22,9 +22,6 @@
         <mxCell id="pJIfcr681z6Tg6nh69cM-22" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="Spacemap Block" vertex="1">
           <mxGeometry height="40" width="80" x="120" y="240" as="geometry" />
         </mxCell>
-        <mxCell id="pJIfcr681z6Tg6nh69cM-39" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Index Component" vertex="1">
-          <mxGeometry height="40" width="120" x="80" y="40" as="geometry" />
-        </mxCell>
         <mxCell id="pJIfcr681z6Tg6nh69cM-40" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fad9d5;strokeColor=#ae4132;" value="Index Block" vertex="1">
           <mxGeometry height="40" width="80" x="280" y="120" as="geometry" />
         </mxCell>
