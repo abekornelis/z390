@@ -342,7 +342,7 @@ the presence of additional Spacemap blocks cause gaps in the XLRA sequence.
 
 Segment blocks and Free blocks are not required, but may be present in the file.
 
-![Diagram showing Blocks in an ESDS Data component](img/zVSAM_V2_File_ESDS_Data.jpg)
+![Diagram showing Blocks in a KSDS Data component](img/zVSAM_V2_File_KSDS_Data.jpg)
 
 ### KSDS Index Organization
 
@@ -351,7 +351,7 @@ When the file grows additional Spacemap blocks are added when needed.
 
 Free blocks are not required, but may be present in the file.
 
-![Diagram showing Blocks in an ESDS Index component](img/zVSAM_V2_File_ESDS_Index.jpg)
+![Diagram showing Blocks in a KSDS Index component](img/zVSAM_V2_File_KSDS_Index.jpg)
 
 #### Index Blocks
 
