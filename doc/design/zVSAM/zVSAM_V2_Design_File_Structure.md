@@ -386,7 +386,7 @@ This example shows the index after adding three more record pointers, causing th
 split. Now there are two leaf blocks, still on the LVL0 chain, and a new root block has been created on the
 LVL1 chain
 
-![Diagram showing layout of a Chain of 2 Index Blocks](img/zVSAM_V2_Drawing_Chain_Index_Blocks_2.jpg)
+![Diagram showing layout of a Chain of 2 Index Blocks](img/zVSAM_V2_Chain_Index_Blocks_2.jpg)
 
 #### Index Block Level 0
 
