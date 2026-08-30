@@ -254,23 +254,21 @@ Each of the 7 block types is explained in more detail below.
 
 Not all block types occur in all file types. The relation is as follows:
 
-| File       | Prefix | Spacemap | Data  | Segment | Index | Free       | Raw   |
-| Type       | Block  | Block    | Block | Block   | Block | Block      | Block |
+| File Type  | Prefix | Spacemap | Data  | Segment | Index | Free       | Raw   |
 |------------|--------|----------|-------|---------|-------|------------|-------|
-| ESDS       | Y      | Y        | Y     | Y       | N     | allow mode | N     |
-| KSDS-data  | Y      | Y        | Y     | Y       | N     | Y          | N     |
-| KSDS-index | Y      | Y        | N     | Y       | Y     | Y          | N     |
-| RRDS       | Y      | Y        | Y     | Y       | N     | Y          | N     |
-| AIX-data   | Y      | Y        | Y     | Y       | N     | Y          | N     |
-| AIX-index  | Y      | Y        | N     | Y       | Y     | Y          | N     |
+| ESDS       | Y      | Y        | Y     | Opt     | N     | allow mode | N     |
+| KSDS-data  | Y      | Y        | Y     | Opt     | N     | Opt        | N     |
+| KSDS-index | Y      | Y        | N     | Y       | Y     | Opt        | N     |
+| RRDS       | Y      | Y        | Y     | Opt     | N     | Opt        | N     |
+| AIX-data   | Y      | Y        | Y     | Opt     | N     | Opt        | N     |
+| AIX-index  | Y      | Y        | N     | Y       | Y     | Opt        | N     |
 | LDS        | Y      | N        | N     | N       | N     | N          | Y     |
 
 > [!NOTE]
-> 1. KSDS and AIX clusters consist of a data component and an index component.
-> 2. ESDS, RRDS, and LDS clusters consist of a data component only.
-> 3. IBM VSAM does not support free pages in an ESDS, or an RRDS with Fixed or Fixed-Spanned records.
+> 1. IBM VSAM does not support free pages in an ESDS, or an RRDS with Fixed or Fixed-Spanned records.
 >    zVSAM - when in allow mode - does support free pages on ESDS and all types of RRDS clusters.
-> 4. Segment and Free blocks are not required, but may occur in the indicated cluster components.
+> 2. Segment and Free blocks are not required, but may optionally occur in the indicated cluster components.
+> 3. Free blocks are not on any chain. The block headers's chain info is invalid by definition.
 
 The following table summarizes the way that blocks in the file are chained from the prefix block.
 Please note that the Prefix block does not reside on any chain.
@@ -332,12 +330,7 @@ An ESDS consists of a Prefix block and a Spacemap block followed by Data blocks 
 When the file grows additional Spacemap blocks are added when needed. Not only block transitions, but also
 the presence of additional Spacemap blocks cause gaps in the XLRA sequence.
 
-
-
-
-
-
-
+![Diagram showing Blocks in an ESDS](img/zVSAM_V2_File_ESDS.jpg)
 
 ### KSDS Data Organization
 
