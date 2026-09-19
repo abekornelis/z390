@@ -120,7 +120,7 @@ is ever split; i.e. only an exact number of these reside within a single segment
 > [!NOTE]
 > As with IBM VSAM, an AIX defined on a cluster that supports
 > spanned records, the key must be defined within the first segment
-> of a recrod.
+> of a record.
 
 Supported Index-types per Cluster Type
 
@@ -130,6 +130,7 @@ Supported Index-types per Cluster Type
 | KSDS         | Y                | Y            | Y                |
 | RRDS         | n.a.             | allow mode   | allow mode       |
 | LDS          | N                | N            | N                |
+| AIX          | N                | N            | N                |
 
 > [!NOTE]
 > 1. IBM VSAM uses an index for RRDS clustes with variable-length records,
@@ -241,13 +242,13 @@ Every block, except raw blocks, has an internal structure consisting of a block 
 a block body and a block footer. The block header and footer have a fixed structure.
 The content of the block body differs by block type.
 
-- for a Prefix block, the block body contains the prefix area, the counters area, and possibly a RRN translation map and free space
-- for a Spacemap block, the block body contains the spacemap data
-- for a Data block, the block body contains a variable-length list of record pointers, data records, and possibly free space
-- for a Segment block, the block body contains a single Segment and possibly free space
-- for an Index block, the block body contains a variable-length list of record pointers, index entries, and possibly free space
-- for a Free block, the block body is all free space
-- for a Raw block, the entire block is data, no footer, no header, no chains
+1. for a Prefix block, the block body contains the prefix area, the counters area, and possibly a RRN translation map and free space
+2. for a Spacemap block, the block body contains the spacemap data
+3. for a Data block, the block body contains a variable-length list of record pointers, data records, and possibly free space
+4. for a Segment block, the block body contains a single Segment and possibly free space
+5. for an Index block, the block body contains a variable-length list of record pointers, index entries, and possibly free space
+6. for a Free block, the block body is all free space
+7. for a Raw block, the entire block is data, no footer, no header, no chains
 
 Raw blocks have no internal structure, as far as zVSAM is concerned.
 Any and all internal structure(s) in an LDS are to be maintained by the application program.
@@ -261,9 +262,9 @@ Not all block types occur in all file types. The relation is as follows:
 | KSDS-data  | Y      | Y        | Y     | Opt     | N     | Opt        | N     |
 | KSDS-index | Y      | Y        | N     | Y       | Y     | Opt        | N     |
 | RRDS       | Y      | Y        | Y     | Opt     | N     | Opt        | N     |
+| LDS        | Y      | N        | N     | N       | N     | N          | Y     |
 | AIX-data   | Y      | Y        | Y     | Opt     | N     | Opt        | N     |
 | AIX-index  | Y      | Y        | N     | Y       | Y     | Opt        | N     |
-| LDS        | Y      | N        | N     | N       | N     | N          | Y     |
 
 > [!NOTE]
 > 1. IBM VSAM does not support free pages in an ESDS, or an RRDS with Fixed or Fixed-Spanned records.
@@ -300,9 +301,9 @@ With the exception of Raw Blocks, all blocks have internal structure elements, s
 All Blocks (except Prefix Block, Free Blocks and Raw Blocks) are chained into a chain which is anchored in the Prefix Block.
 The type of Block determines on which chain it resides:
 - Spacemap Chain
-- Data Chain (data blocks, with the exception of non-first segment blocks)
-- Segment chain (for non-first segment blocks exclusively)
-- Index chains (one for each index level)
+- Data Chain (data blocks only, not segment blocks)
+- Segment chain (segment blocks only, not data blocks)
+- Index chains (one chain for each index level)
 
 Every Block (except Raw Blocks) has a header holding information to implement the applicable chain.
 Every Block (except Raw Blocks) also has a footer, which mainly serves to guard integrity of the data stored on the Data Block.
@@ -315,6 +316,7 @@ Not all structure elements occur in all Block types. The relation is as follows:
 | Block Footer        | Y      | Y        | Y    | Y       | Y     | Y            | N   |
 | Record Pointer List | N      | N        | Y    | N       | Y     | N            | N   |
 | Record data         | N      | N        | Y    | Y       | N     | N            | Y   |
+| DRP                 | N      | N        | Y    | N       | N     | N            | N   |
 | Free Space          | Opt    | N        | Opt  | Opt     | Opt   | Y            | N   |
 | Prefix Area         | Y      | N        | N    | N       | N     | N            | N   |
 | Counters Area       | Y      | N        | N    | N       | N     | N            | N   |
@@ -545,25 +547,15 @@ Each record contains a unique key and all its associated primary key values.
 Only when the AIX is opened as a path, will zVSAM use the AIX data to retrieve
 records from the underlying base cluster.
 
-AIX unique records have the following format:
+AIX records have the following formats:
 
-| AIX on ... | Record Content                  |
-|------------|---------------------------------|
-| ESDS       | AIX key followed by XLRA(8)     |
-| KSDS       | AIX key followed by primary key |
-| RRDS       | AIX key followed by RRN         |
-| LDS        | not supported                   |
-| AIX        | not supported                   |
-
-AIX non-unique records have the following format:
-
-| AIX on ... | Record Content                               |
-|------------|----------------------------------------------|
-| ESDS       | AIX key followed by 1 or more XRBA(8) values |
-| KSDS       | AIX key followed by 1 or more primary keys   |
-| RRDS       | AIX key followed by 1 or more RRN values     |
-| LDS        | not supported                                |
-| AIX        | not supported                                |
+| AIX on ... | Record Content for Unique index | Record Content for Non-Unique index          |
+|------------|---------------------------------|----------------------------------------------|
+| ESDS       | AIX key followed by XLRA(8)     | AIX key followed by 1 or more XRBA(8) values |
+| KSDS       | AIX key followed by primary key | AIX key followed by 1 or more primary keys   |
+| RRDS       | AIX key followed by RRN         | AIX key followed by 1 or more RRN values     |
+| LDS        | not supported                   | not supported                                |
+| AIX        | not supported                   | not supported                                |
 
 How the different types of blocks might sit in the physical file is the same as for a KSDS data component.
 Please see [KSDS Data Organization](#ksds-data-organization) for a graphical example.
@@ -600,7 +592,11 @@ The records are stored one after another, filling the block until no space is le
 When the remaining free space is insufficient to accommodate another record, that free space remains
 unusable. Unusable space can be eliminated by building the dataset with `DATAADJUST=YES`.
 
-The format of an ESDS block with Fixed records is identical to that for a KSDS.
+Format:
+
+![Diagram showing layout of an ESDS Block with Fixed records](img/zVSAM_V2_Block_Type_ESDS_F.jpg)
+
+**Note**: The format of an ESDS block with Fixed records is identical to that for a KSDS.
 The only difference being that free-space (`DATAFREESPACE=nn%`) does not apply to ESDS datasets.
 
 | Function      | Notes                                   |
@@ -613,15 +609,18 @@ The only difference being that free-space (`DATAFREESPACE=nn%`) does not apply t
 
 ### ESDS Fixed Spanned
 
-Record size is expected to exceed block size, so the record is split into segments, the
-first segment is created to fill an entire block, and the rest of the record goes into one or more secondary
-segments which are stored on the next blocks. All record data is stored on the segment chain.
-Data blocks only contain Displaced Record Pointers - one for each record.
-
 The records are stored one after another, using a block for each segment and starting each
-record on a new block. Each segment is preceded by a Segment Prefix.
+record on a new block. Record size is expected to exceed block size, so the record is split into segments, the
+first segment is created to fill an entire block, and the rest of the record goes into one or more secondary
+segments which are stored on the next blocks.
+
+Each segment is preceded by a Segment Prefix (SPX, marked in yellow)
 
 zVSAM extension: Any AIX keys need not be in the first segment.
+
+Below we show an example where each record requires three segments:
+
+![Diagram showing layout of an ESDS Block with Fixed Spanned records](img/zVSAM_V2_Drawing_Block_Type_ESDS_FS.jpg)
 
 **Note**: The format of an ESDS block with Fixed Spanned records is identical to that for a KSDS.
 
@@ -631,7 +630,11 @@ zVSAM extension: Any AIX keys need not be in the first segment.
 | Update        | Yes                                                |
 | Delete        | No                                                 |
 | Length change | n/a                                                |
-| Access by:    | XLRA or AIX key                                    |
+| Access by:    | (X)RBA or AIX key                                  |
+
+> [!NOTE]
+> RBA/XRBA not supported by zVSAM. We'll use XLRSN instead.
+> Need to investigate how much RBA was implemented by Melvyn.
 
 ### ESDS Variable non-Spanned
 
@@ -658,7 +661,7 @@ Below we show an example showing how various numbers of records might fit into t
 | Access by:    | (X)RBA or AIX key                                  |
 
 > [!NOTE]
-> RBA/XRBA not supported by zVSAM. We'll use XLRA instead.
+> RBA/XRBA not supported by zVSAM. We'll use XLRSN instead.
 > Need to investigate how much RBA was implemented by Melvyn.
 
 > [!NOTE]
@@ -699,7 +702,7 @@ or how a single record might occupy multiple blocks of the file
 | Access by:    | (X)RBA or AIX key                                  |
 
 > [!NOTE]
-> RBA/XRBA not supported by zVSAM. We'll use XLRA instead.
+> RBA/XRBA not supported by zVSAM. We'll use XLRSN instead.
 > Need to investigate how much RBA was implemented by Melvyn.
 
 > [!NOTE]
