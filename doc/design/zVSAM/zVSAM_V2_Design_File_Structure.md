@@ -685,7 +685,7 @@ What the diagram shows:
 - RPTR list in violet following the block header immediately
 - records in white, allocated from the block footer towards the lower end of the block
 - each record is preceded by an RLF field in grey
-- Rercord 7 has been replaced by a DRP; the DRP is not preceded by an RLF
+- Record 7 has been replaced by a DRP; the DRP is not preceded by an RLF
 - left-over free space in green filling the area between the RPTR list and the records
 - left-over free space in green filling the area between record 8 and the DRP for record 7; this gap was created when record 7 was moved out - the DRP is smaller than the record it represents
 - remaining free space was not enough to accommodate the next record; the block is full; free space is usable for lengthening existing records only
@@ -767,7 +767,7 @@ What the diagram shows:
 | Access by:    | Sequence, XLRA, or AIX key                         |
 
 > [!NOTE]
-> A rewrite that lengthens a record may require more room that is available on the block.
+> A rewrite that lengthens a record may require more room than is available on the block.
 > In this case the RPTR is marked as a displaced record, and the record is physically stored
 > on another Block that has enough free space to accommodate the lengthened record.
 
@@ -790,7 +790,16 @@ When the block is full the block will be split and any new block will have at le
 
 Format:
 
-![Diagram showing layout of a KSDS Block with Fixed records](img/zVSAM_V2_Drawing_Block_Type_KSDS_F.jpg)
+![Diagram showing layout of a KSDS Block with Fixed records](img/zVSAM_V2_Block_Type_KSDS_F.jpg)
+
+What the diagram shows:
+- block header and block footer in blue at beginning and end of block
+- RPTR list in violet following the block header immediately
+- records in white, allocated from the block footer towards the lower end of the block
+- left-over free space in green filling the area between the RPTR list and the records
+- free space in green filling the area between records 3 and 5; this area was used for record 4 which has been deleted
+- free space has not yet been consolidated - remaining free space is enough to accommodate another record, whether consolidated or not
+- elements are not to scale; yet all records are shown equal in size
 
 | Function  | Notes                                              |
 |-----------|----------------------------------------------------|
@@ -798,26 +807,47 @@ Format:
 | Update    | Yes, the primary key must not be changed           |
 | Delete    | Yes                                                |
 | Length    | change n/a                                         |
-| Access by | Primary key or AIX key. (X)RBA not yet implemented |
-
-> [!NOTE]
-> RBA/XRBA not supported by zVSAM. We'll use XLRA instead.
-> Need to investigate how much RBA was implemented by Melvyn.
+| Access by | Sequence, Primary key, AIX key, or XLRA            |
 
 ### KSDS Fixed Spanned
 
-The records are stored one after another, using a block for each segment and starting each
-record on a new block. Record size is expected to exceed block size, so the record is split into segments, the
-first segment is created to fill an entire block, and the rest of the record goes into one or more secondary
-segments which are stored on the next blocks.
+If record length is small enough to make each record fit on a block, the spanned attribute is effectively ignored
+and the cluster's internal organization is identical to that of a KSDS with Fixed Non-Spanned records.
+The record length being Fixed, this will hold either for all records, or for none of them.
 
-Each segment is preceded by a Segment Prefix (SPX, marked in yellow)
+Assuming the record length is such that a record cannot be stored in its entirety within a single Data Block,
+each record will be represented by a Displaced Record Pointer (DRP). The DRPs are stored one after another in the data block.
+
+The record's data content is split into segments; each segment is prefixed with a Segment PrefiX (SPX).
+Each segment plus its SPX is made to exactly fill an entire segment block. The segment blocks are chained in sequence onto the segment chain.
+The DRP points to the first segment block of the record.
 
 zVSAM extension: The primary key and any AIX keys need not be in the first segment.
 
-Below we show an example where each record requires three segments:
+Below we show an example where each record requires two segments:
 
-![Diagram showing layout of a KSDS Block with Fixed Spanned records](img/zVSAM_V2_Drawing_Block_Type_KSDS_FS.jpg)
+![Diagram showing layout of a KSDS Block with Fixed Spanned records](img/zVSAM_V2_Block_Type_KSDS_FS.jpg)
+
+What the diagram shows:
+- a single data block with:
+    - block header and block footer in blue at beginning and end of the block
+    - RPTR list in violet following the block header immediately on the data block
+    - DRPs in white on the data block. DRPs are small, hence we expect a long RPTR list and many DRPs on a data block
+    - DRP 3 is missing, its location is marked free space - this is the result of record #3 having been deleted
+    - left-over free space in green filling the area between the RPTR list and the DRPs
+    - free space has not yet been consolidated
+    - elements are not to scale; yet all DRPs are shown equal in size
+- two segment blocks, holding a single record:
+    - block header and block footer in blue at beginning and end of each block
+    - no RPTR list on any segment block
+    - a single SPX preceding each segment, a first and last SPX are shown; no middle SPX in this example
+    - segments in white, allocated from the block footer towards the lower end of the block; the first block is entirely filled
+    - left-over free space in green filling the area between the block header and the segment's SPX on the last segment only
+    - remaining free space is unusable, except for lengthening the record
+    - elements are not to scale
+
+> [!NOTE]
+> The format of a KSDS block with Fixed Spanned records is identical to that for an ESDS.
 
 | Function      | Notes                                              |
 |---------------|----------------------------------------------------|
@@ -825,23 +855,38 @@ Below we show an example where each record requires three segments:
 | Update        | Yes, the primary key must not be changed           |
 | Delete        | Yes                                                |
 | Length change | n/a                                                |
-| Access by:    | Primary key or AIX key. (X)RBA not yet implemented |
-
-> [!NOTE]
-> RBA/XRBA not supported by zVSAM. We'll use XLRA instead.
-> Need to investigate how much RBA was implemented by Melvyn.
+| Access by:    | Sequence, Primary key, AIX key, or XLRA            |
 
 ### KSDS Variable non-Spanned
 
 The records are stored one after another, filling the block until no space is left.
-Every record is preceded by a Record Length Field (RLF, marked in grey).
+Every record is preceded by a Record Length Field (RLF).
 
 When remaining free space is insufficient to accommodate another record, that free space remains
-unallocated (marked in blue) and the record is placed on the next block.
+unallocated and the record is placed on the next block.
 
-Below we show an example showing how various numbers of records might fit into the blocks:
+A Displaced Record Pointer (DRP) is created when an existing record is lengthened, such that
+it no longer fits on the block. The DRP takes its place, and the record itself is stored on
+another data block.
 
-![Diagram showing layout of a KSDS Block with Variable records](img/zVSAM_V2_Drawing_Block_Type_KSDS_V.jpg)
+Below we show an example showing how various numbers of records might fit into the blocks
+
+![Diagram showing layout of a KSDS Block with Variable records](img/zVSAM_V2_Block_Type_KSDS_V.jpg)
+
+What the diagram shows:
+- block header and block footer in blue at beginning and end of block
+- RPTR list in violet following the block header immediately
+- records in white, allocated from the block footer towards the lower end of the block
+- each record is preceded by an RLF field in grey
+- Record 7 has been replaced by a DRP; the DRP is not preceded by an RLF
+- Record 1 has been deleted, the area it occupied is now marked free space
+- left-over free space in green filling the area between the RPTR list and the records
+- left-over free space in green filling the area between record 8 and the DRP for record 7; this gap was created when record 7 was moved out - the DRP is smaller than the record it represents
+- free space has not yet been consolidated - remaining free space may be consolidated when needed, typically before inserting a new record
+- elements are not to scale
+
+> [!NOTE]
+> The format of a KSDS block with Variable records is identical to that for an ESDS.
 
 | Function      | Notes                                                                             |
 |---------------|-----------------------------------------------------------------------------------|
@@ -849,49 +894,76 @@ Below we show an example showing how various numbers of records might fit into t
 | Update        | Yes, the primary key must not be changed                                          |
 | Delete        | Yes                                                                               |
 | Length change | Yes. When a record is shortened it must not affect the primary key or any AIX key |
-| Access by:    | Primary key or AIX key. (X)RBA not yet implemented                                |
+| Access by:    | Sequence, Primary key, AIX key, or XLRA                                           |
 
 > [!NOTE]
-> RBA/XRBA not supported by zVSAM. We'll use XLRA instead.
-> Need to investigate how much RBA was implemented by Melvyn.
-
-> [!NOTE]
-> A rewrite that lengthens a record may require more room that is available on the block.
-> In this case the RPTR is marked as a displaced record, and the record is physically stored
+> A rewrite that lengthens a record may require more room than is available on the block.
+> In this case the RPTR may be marked as a displaced record, and the record is physically stored
 > on a nearby Block that has enough free space to accommodate the lengthened record.
+> Alterntively, zVSAM may decide to split the entire data block into two blocks.
 
 ### KSDS Variable Spanned
 
-The records are stored one after another, filling the block until no space is left.
-Every record is preceded by a Record Length Field (RLF, marked in grey).
-When remaining free space is insufficient to accommodate another record, that free space remains
-unallocated (marked in blue) and the record is placed on the next block.
 
-Only if the record size exceeds the usable block size is the record is split into segments and each segment is
-prefixed with a Segment Prefix. The first segment is created to fill an entire block, and the rest of the record
-goes into one or more secondary segments which are stored on the next blocks.
-Each segment is preceded by a Segment Prefix (SPX, marked in yellow).
+In principle, the records are stored one after another, filling the block until no space is left.
+Every record is preceded by a Record Length Field (RLF).
+When remaining free space is insufficient to accommodate another record, that free space remains
+unallocated and the record is placed on the next block. Remaining free space can be used
+when an existing record on the block is lengthened, or when a segmented record is shortened.
+
+If record length is small enough to make a record fit on a block, the record is stored without being segmented.
+In this case the record will be stored as if it were a Non-Spanned Variable-length record.
+
+For a record that cannot be stored in its entirety within a single Data Block,
+the record will be represented by a Displaced Record Pointer (DRP).
+The DRP is stored on the data block in the location where the record would have gone if it had been small enough.
+
+A segmented record's data content - including its RLF - is split into segments; each segment is prefixed with a Segment PrefiX (SPX).
+Each segment plus its SPX is made to exactly fill an entire segment block. The segment blocks are chained in sequence onto the segment chain.
+The DRP points to the first segment block of the record.
+
+A segmented record occupying only a single segment can be created when a multi-segment record is updated
+to a shorter length, such that a single segment can hold the entire record.
 
 zVSAM extension: The primary key and any AIX keys need not be in the first segment.
 
 Below we show an example showing how various numbers of records might fit into the blocks of the file,
 or how a single record might occupy multiple blocks of the file.
 
-![Diagram showing layout of a KSDS Block with Spanned Variable records](img/zVSAM_V2_Drawing_Block_Type_KSDS_VS.jpg)
+![Diagram showing layout of a KSDS Block with Spanned Variable records](img/zVSAM_V2_Block_Type_KSDS_VS.jpg)
+
+What the diagram shows:
+- a single data block with:
+    - block header and block footer in blue at beginning and end of the block
+    - RPTR list in violet following the block header immediately on the data block
+    - DRPs and records in white on the data block; records are preceded by a RLF; DRPs are not preceded by a RLF
+    - left-over free space in green filling the area between the RPTR list and the DRP / record data
+    - free space in green filling the area between record 3 and DRP 5, marking the area where record 4 was stored before it got deleted
+    - free space has not been consolidated - it will be consolidated when needed
+    - elements are not to scale; yet all DRPs are shown equal in size
+- two segment blocks, holding a single record:
+    - block header and block footer in blue at beginning and end of each block
+    - no RPTR list on any segment block
+    - a single SPX preceding each segment, a first and last SPX are shown; no middle SPX in this example
+    - the RLF follows the first segment's PSX, preceding actual record data
+    - segments in white, allocated from the block footer towards the lower end of the block; the first block is entirely filled
+    - left-over free space in green filling the area between the block header and the segment's SPX on the last segment only
+    - remaining free space is unusable, except for lengthening the record
+    - elements are not to scale
+
+> [!NOTE]
+> The format of a KSDS block with Variable Spanned records is identical to that for an ESDS.
 
 | Function      | Notes                                                                             |
+|---------------|-----------------------------------------------------------------------------------|
 | Add           | Yes                                                                               |
 | Update        | Yes, the primary key must not be changed                                          |
 | Delete        | Yes                                                                               |
 | Length change | Yes. When a record is shortened it must not affect the primary key or any AIX key |
-| Access by:    | Primary key or AIX key. (X)RBA not yet implemented                                |
+| Access by:    | Sequence, Primary key, AIX key, or XLRA                                           |
 
 > [!NOTE]
-> RBA/XRBA not supported by zVSAM. We'll use XLRA instead.
-> Need to investigate how much RBA was implemented by Melvyn.
-
-> [!NOTE]
-> A rewrite that lengthens a record may require more room that is available on the block.
+> A rewrite that lengthens a record may require more room than is available on the block.
 > In this case the RPTR is marked as a displaced record, and the record is physically stored
 > on a nearby Block that has enough free space to accommodate the lengthened record.
 
@@ -969,7 +1041,7 @@ unallocated (marked in blue) and the record is placed on the next block.
 > were allocated when the cluster was initially loaded.
 
 > [!NOTE]
-> A rewrite that lengthens a record may require more room that is available on the block.
+> A rewrite that lengthens a record may require more room than is available on the block.
 > In this case the RPTR is marked as a displaced record, and the record is physically stored
 > on a nearby Block that has enough free space to accommodate the lengthened record.
 
@@ -1021,7 +1093,7 @@ Below we show an example showing how various numbers of records might fit into t
 | Access by:    | RRN                                                              |
 
 > [!NOTE]
-> A rewrite that lengthens a record may require more room that is available on the block.
+> A rewrite that lengthens a record may require more room than is available on the block.
 > In this case the RPTR is marked as a displaced record, and the record is physically stored
 > on a nearby Block that has enough free space to accommodate the lengthened record.
 
