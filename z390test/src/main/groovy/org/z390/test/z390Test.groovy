@@ -117,10 +117,14 @@ class z390Test {
 
     def callZ390(String asmFileExcludingExtension, String command, String... args) {
         println("Executing ${command}: ${asmFileExcludingExtension}")
+        // Repo root as cwd: so catalog relative paths resolve correctly
+        File workDir = new File(this.project_root.toString()).canonicalFile
+        println("workdir: ${workDir}")
+        // prepare command
         var cmd = ["java", "-classpath", basePath('z390.jar'),
                    '-Xrs', '-Xms150000K', '-Xmx150000K', command, asmFileExcludingExtension, *args].join(" ")
         println(cmd)
-        var proc = cmd.execute(this.getEnvList(), null)   // , workDir);
+        var proc = cmd.execute(this.getEnvList(), workDir)
         var sout = new StringBuilder()
         var serr = new StringBuilder()
         proc.consumeProcessOutput(sout, serr)
@@ -359,6 +363,35 @@ class z390Test {
             } else {
                 break   // trailer / non-SNAP — do not include
             }
+        }
+        return result
+    }
+
+    /**
+     * Program WTO / console lines from an EZ390 .LOG (or a full-LOG .TF1).
+     * Skips the EZ390 header, including wrapped SYSMAC/SYSCPY option lines,
+     * and stops at the EZ390 trailer.
+     */
+    static List<String> extractProgramLogLines(String logText) {
+        def lines = logText.readLines()
+        int start = lines.findIndexOf { it.contains('EZ390I options') }
+        if (start < 0) {
+            return []
+        }
+        def result = []
+        boolean started = false
+        for (int i = start + 1; i < lines.size(); i++) {
+            def line = lines[i]
+            if (line.contains('EZ390I total errors') || line.contains('EZ390 ENDED')) {
+                break
+            }
+            if (!started) {
+                if (line ==~ /^\s+.*/) {
+                    continue  // wrapped options
+                }
+                started = true
+            }
+            result << line
         }
         return result
     }
