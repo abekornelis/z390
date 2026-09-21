@@ -749,7 +749,7 @@ What the diagram shows:
     - block header and block footer in blue at beginning and end of each block
     - no RPTR list on any segment block
     - a single SPX preceding each segment, a first and last SPX are shown; no middle SPX in this example
-    - the RLF follows the first segment's PSX, preceding actual record data
+    - the RLF follows the first segment's SPX, preceding actual record data
     - segments in white, allocated from the block footer towards the lower end of the block; the first block is entirely filled
     - left-over free space in green filling the area between the block header and the segment's SPX on the last segment only
     - remaining free space is unusable, except for lengthening the record
@@ -809,6 +809,11 @@ What the diagram shows:
 | Length    | change n/a                                         |
 | Access by | Sequence, Primary key, AIX key, or XLRA            |
 
+> [!NOTE]
+> Over time, add/delete operations may cause records to appear out-of-sequence on the block.
+> The logical sequence of the records and slots is defined by the RPTR list,
+> not by their physical order within the block.
+
 ### KSDS Fixed Spanned
 
 If record length is small enough to make each record fit on a block, the spanned attribute is effectively ignored
@@ -857,6 +862,11 @@ What the diagram shows:
 | Length change | n/a                                                |
 | Access by:    | Sequence, Primary key, AIX key, or XLRA            |
 
+> [!NOTE]
+> Over time, add/delete operations may cause records to appear out-of-sequence on the block.
+> The logical sequence of the records and slots is defined by the RPTR list,
+> not by their physical order within the block.
+
 ### KSDS Variable non-Spanned
 
 The records are stored one after another, filling the block until no space is left.
@@ -884,6 +894,11 @@ What the diagram shows:
 - left-over free space in green filling the area between record 8 and the DRP for record 7; this gap was created when record 7 was moved out - the DRP is smaller than the record it represents
 - free space has not yet been consolidated - remaining free space may be consolidated when needed, typically before inserting a new record
 - elements are not to scale
+
+> [!NOTE]
+> Over time, add/delete/length-changing update operations may cause records to appear out-of-sequence on the block.
+> The logical sequence of the records and slots is defined by the RPTR list,
+> not by their physical order within the block.
 
 > [!NOTE]
 > The format of a KSDS block with Variable records is identical to that for an ESDS.
@@ -945,11 +960,16 @@ What the diagram shows:
     - block header and block footer in blue at beginning and end of each block
     - no RPTR list on any segment block
     - a single SPX preceding each segment, a first and last SPX are shown; no middle SPX in this example
-    - the RLF follows the first segment's PSX, preceding actual record data
+    - the RLF follows the first segment's SPX, preceding actual record data
     - segments in white, allocated from the block footer towards the lower end of the block; the first block is entirely filled
     - left-over free space in green filling the area between the block header and the segment's SPX on the last segment only
     - remaining free space is unusable, except for lengthening the record
     - elements are not to scale
+
+> [!NOTE]
+> Over time, add/delete/length-changing update operations may cause records to appear out-of-sequence on the block.
+> The logical sequence of the records and slots is defined by the RPTR list,
+> not by their physical order within the block.
 
 > [!NOTE]
 > The format of a KSDS block with Variable Spanned records is identical to that for an ESDS.
@@ -968,7 +988,7 @@ What the diagram shows:
 > on a nearby Block that has enough free space to accommodate the lengthened record.
 
 > [!NOTE]
-> When a record is lengthened, it may be necessary to convert it from a normal varaible-length
+> When a record is lengthened, it may be necessary to convert it from a normal variable-length
 > record to a segmented one. When a record is shortened - at least in theory - a segmented record
 > might qualify to be converted to a normal variable-length record. Whether we implement this latter
 > conversion remains to be seen. There is no hard reason to object against having shortened VS record
@@ -976,7 +996,10 @@ What the diagram shows:
 
 ### RRDS Fixed non-Spanned
 
-The records are stored one after another, filling the block until no space is left.
+An RRDS consists of slots (RRNs) which may or may not contain a record.
+Empty slots are defined by their RPTR entry having the `RPTR_MTY` flag set.
+
+The records or slots are stored one after another, filling the block until no space is left.
 When the remaining free space is insufficient to accommodate another record, that free space remains
 unusable. Unusable space can be eliminated by building the dataset with `DATAADJUST=YES`.
 
@@ -985,7 +1008,15 @@ Empty slots are initially binary zeros with `RPTR_MTY` set.
 
 Below we show an example where 8 record slots fit into a block:
 
-![Diagram showing layout of an RRDS Block with Fixed records](img/zVSAM_V2_Drawing_Block_Type_RRDS_F.jpg)
+![Diagram showing layout of an RRDS Block with Fixed records](img/zVSAM_V2_Block_Type_RRDS_F.jpg)
+
+What the diagram shows:
+- block header and block footer in blue at beginning and end of block
+- RPTR list in violet following the block header immediately
+- records and empty slots in white, allocated from the block footer towards the lower end of the block
+- left-over free space in green filling the area between the RPTR list and the records
+- remaining free space is not enough to accommodate another record; the free space is unusable
+- elements are not to scale; yet all records are shown equal in size
 
 | Function      | Notes                                          |
 |---------------|------------------------------------------------|
@@ -993,25 +1024,53 @@ Below we show an example where 8 record slots fit into a block:
 | Update        | Yes                                            |
 | Delete        | Yes, slots may not be deleted. RPTR_MTY is set |
 | Length change | n/a                                            |
-| Access by:    | RRN                                            |
+| Access by:    | Sequence, RRN, or XLRA                         |
 
 ### RRDS Fixed Spanned
 
-The records are stored one after another, using a block for each segment and starting each
-record on a new block. Record size is expected to exceed block size, so the record is split into segments, the
-first segment is created to fill an entire block, and the rest of the record goes into one or more secondary
-segments which are stored on the next blocks.
+An RRDS consists of slots (RRNs) which may or may not contain a record.
+Empty slots are defined by their RPTR entry having the `RPTR_MTY` flag set.
 
-Each segment is preceded by a Segment Prefix (SPX, marked in yellow).
+If record length is small enough to make each record fit on a block, the spanned attribute is effectively ignored
+and the cluster's internal organization is identical to that of an RRDS with Fixed Non-Spanned records.
+The record length being Fixed, this will hold either for all records, or for none of them.
+
+Assuming the record length is such that a record cannot be stored in its entirety within a single Data Block,
+each record or slot will be represented by a Displaced Record Pointer (DRP). The DRPs are stored one after another in the data block.
+
+The record's data content is split into segments; each segment is prefixed with a Segment PrefiX (SPX).
+Each segment plus its SPX is made to exactly fill an entire segment block. The segment blocks are chained in sequence onto the segment chain.
+The DRP points to the first segment block of the record.
+
+Each segment is preceded by a Segment Prefix (SPX).
 
 An RRDS consists of slots (RRNs) which may or may not contain a record.
 Empty slots are initially binary zeros with `RPTR_MTY` set.
 
 This dataset type is a zVSAM extension
 
-Below we show an example where each record requires three segments:
+zVSAM extension: In allow mode an AIX key need not be in the first segment.
 
-![Diagram showing layout of an RRDS Block with Fixed Spanned records](img/zVSAM_V2_Drawing_Block_Type_RRDS_FS.jpg)
+Below we show an example where each record requires two segments:
+
+![Diagram showing layout of an RRDS Block with Fixed Spanned records](img/zVSAM_V2_Block_Type_RRDS_FS.jpg)
+
+What the diagram shows:
+- a single data block with:
+    - block header and block footer in blue at beginning and end of the block
+    - RPTR list in violet following the block header immediately on the data block
+    - DRPs in white on the data block. DRPs are small, hence we expect a long RPTR list and many DRPs on a data block
+    - left-over free space in green filling the area between the RPTR list and the DRPs
+    - the maximum number of DRPs that can be addressed on a single block may not be enough to fill the entire block. The remainder is unusable free space.
+    - elements are not to scale; yet all DRPs are shown equal in size
+- two segment blocks, holding a single record:
+    - block header and block footer in blue at beginning and end of each block
+    - no RPTR list on any segment block
+    - a single SPX preceding each segment, a first and last SPX are shown; no middle SPX in this example
+    - segments in white, allocated from the block footer towards the lower end of the block; the first block is entirely filled
+    - left-over free space in green filling the area between the block header and the segment's SPX on the last segment only
+    - remaining free space is unusable, except for lengthening the record
+    - elements are not to scale
 
 | Function      | Notes                                          |
 |---------------|------------------------------------------------|
@@ -1019,26 +1078,22 @@ Below we show an example where each record requires three segments:
 | Update        | Yes                                            |
 | Delete        | Yes, slots may not be deleted. RPTR_MTY is set |
 | Length change | n/a                                            |
-| Access by:    | RRN                                            |
+| Access by:    | Sequence, RRN, or XLRA                         |
 
 ### RRDS Variable non-Spanned
 
-The records are stored one after another, filling the block until no space is left.
+An RRDS consists of slots (RRNs) which may or may not contain a record.
+Empty slots are defined by their RPTR entry having the `RPTR_MTY` flag set.
+
+The records or slots are stored one after another, filling the block until no space is left.
 Every record is preceded by a Record Length Field (RLF).
 
-An RRDS consists of slots (RRNs) which may or may not contain a record.
-Empty slots consist of a dummy RLF containing `X'00000004'` with `RPTR_MTY` set, these are shown
-in green in the diagram. Non-empty slots have a grey RLF.
+When remaining free space is insufficient to accommodate another record or slot, that free space remains
+unallocated and the record or slot is placed on the next block.
 
-When remaining free space is insufficient to accommodate another record, that free space remains
-unallocated (marked in blue) and the record is placed on the next block.
-
-> [!NOTE]
-> This will not work as it tends to push a storage shortage on one block out to the next.
-> Which may have a cascading effect, affecting many blocks in a row.
-> Instead we should mark the RPTR entry as a displaced record, and store the record physically
-> after the last allocated record slot. Or use a nearby free page, if sufficient free pages
-> were allocated when the cluster was initially loaded.
+A Displaced Record Pointer (DRP) is created when an existing record is lengthened, such that
+it no longer fits on the block. The DRP takes its place, and the record itself is stored on
+another data block.
 
 > [!NOTE]
 > A rewrite that lengthens a record may require more room than is available on the block.
@@ -1047,50 +1102,97 @@ unallocated (marked in blue) and the record is placed on the next block.
 
 Below we show an example showing how various numbers of records might fit into the blocks
 
-![Diagram showing layout of an RRDS Block with Variable records](img/zVSAM_V2_Drawing_Block_Type_RRDS_V.jpg)
+![Diagram showing layout of an RRDS Block with Variable records](img/zVSAM_V2_Block_Type_RRDS_V.jpg)
+
+What the diagram shows:
+- block header and block footer in blue at beginning and end of block
+- RPTR list in violet following the block header immediately
+- records and empty slots in white, allocated from the block footer towards the lower end of the block
+- each record is preceded by an RLF field in grey
+- Record 8 has been replaced by a DRP; the DRP is not preceded by an RLF
+- Record 4 has been deleted, the area it occupied might be reclaimed as free space, but there has been no need to do so on this block
+- Slot 2 has never been used - its RPTR has the `RPTR_MTY` flag set to indicate its absence
+- left-over free space in green filling the area between the RPTR list and the records
+- left-over free space in green filling the area between record 9 and the DRP for record 8; this gap was created when record 8 was moved out - the DRP is smaller than the record it represents
+- remaining free space was not enough to accommodate the next record; the block is full; free space is usable for lengthening existing records only
+- elements are not to scale
+
+> [!NOTE]
+> When a data block is extended by adding a record beyond the highest allocated slot,
+> as many blocks as needed will be created to define and hold all intervening slots.
+> The blocks will mainly consist of empty record slots, each having an RLF only.
+
+> [!NOTE]
+> Over time, add/delete/length-changing update operations may cause records to appear out-of-sequence on the block.
+> The logical sequence of the records and slots is defined by the RPTR list,
+> not by their physical order within the block.
 
 | Function      | Notes                                                            |
 |---------------|------------------------------------------------------------------|
 | Add           | Yes, but only to the end of the dataset                          |
 | Update        | Yes                                                              |
 | Delete        | Yes, slots may not be deleted. `RPTR_MTY is set` instead.        |
-|               | The record is replaced by a dummy RLF and the space is reclaimed |
 | Length change | Yes                                                              |
-| Access by:    | RRN                                                              |
+| Access by:    | Sequence,RRN, or XLRA                                            |
 
 ### RRDS Variable Spanned
 
-The records are stored one after another, filling the block until no space is left.
-Every record is preceded by a Record Length Field (RLF).
-
 An RRDS consists of slots (RRNs) which may or may not contain a record.
-Empty slots consist of a dummy RLF containing `X'00000004'` with `RPTR_MTY` set, these are shown
-in green in the diagram. Non-empty slots have a grey RLF.
+Empty slots are defined by their RPTR entry having the `RPTR_MTY` flag set.
 
+In principle, the records are stored one after another, filling the block until no space is left.
+Every record is preceded by a Record Length Field (RLF).
 When remaining free space is insufficient to accommodate another record, that free space remains
-unallocated (marked in blue) and the record is placed on the next block.
+unallocated and the record is placed on the next block. Remaining free space can be used
+when an existing record on the block is lengthened, or when a segmented record is shortened.
 
-When a record length exceeds the available space in a block the record is split into segments, the first
-segment is created to fill an entire block, and the rest of the record goes into one or more secondary segments
-which are stored on the next blocks.
+If record length is small enough to make a record fit on its block, the record is stored without being segmented.
+In this case the record will be stored as if it were a Non-Spanned Variable-length record.
 
-Each segment is preceded by a Segment Prefix (SPX, marked in yellow).
+For a record that cannot be stored in its entirety within its Data Block,
+the record will be represented by a Displaced Record Pointer (DRP).
+The DRP is stored on the data block in the location where the record would have gone if it had been small enough.
+
+A segmented record's data content - including its RLF - is split into segments; each segment is prefixed with a Segment PrefiX (SPX).
+Each segment plus its SPX is made to exactly fill an entire segment block. The segment blocks are chained in sequence onto the segment chain.
+The DRP points to the first segment block of the record.
+
+A segmented record occupying only a single segment can be created when a multi-segment record is updated
+to a shorter length, such that a single segment can hold the entire record.
 
 This dataset type is a zVSAM extension.
 
-Below we show an example showing how various numbers of records might fit into the blocks
+zVSAM extension: Any AIX keys need not be in the first segment.
 
-![Diagram showing layout of an RRDS Block with Variable Spanned records](img/zVSAM_V2_Drawing_Block_Type_RRDS_VS.jpg)
+Below we show an example showing how various numbers of records might fit into the blocks of the file,
+or how a single record might occupy multiple blocks of the file
+
+![Diagram showing layout of an RRDS Block with Variable Spanned records](img/zVSAM_V2_Block_Type_RRDS_VS.jpg)
+
+What the diagram shows:
+- a single data block with:
+    - block header and block footer in blue at beginning and end of the block
+    - RPTR list in violet following the block header immediately on the data block
+    - DRPs and records in white on the data block; records are preceded by a RLF; DRPs are not preceded by a RLF
+    - left-over free space in green filling the area between the RPTR list and the DRP / record data
+    - elements are not to scale; yet all DRPs are shown equal in size
+- two segment blocks, holding a single record:
+    - block header and block footer in blue at beginning and end of each block
+    - no RPTR list on any segment block
+    - a single SPX preceding each segment, a first and last SPX are shown; no middle SPX in this example
+    - the RLF follows the first segment's SPX, preceding actual record data
+    - segments in white, allocated from the block footer towards the lower end of the block; the first block is entirely filled
+    - left-over free space in green filling the area between the block header and the segment's SPX on the last segment only
+    - remaining free space is unusable, except for lengthening the record
+    - elements are not to scale
 
 | Function      | Notes                                                            |
 |---------------|------------------------------------------------------------------|
 | Add           | Yes, but only to the end of the dataset                          |
 | Update        | Yes                                                              |
 | Delete        | Yes, slots may not be deleted. RPTR_MTY is set                   |
-|               | The record is replaced by a dummy RLF and the space is reclaimed |
-|               | For segmented records, the freed blocks are marked as available  |
 | Length change | Yes                                                              |
-| Access by:    | RRN                                                              |
+| Access by:    | Sequence, RRN, or XLRA                                           |
 
 > [!NOTE]
 > A rewrite that lengthens a record may require more room than is available on the block.
@@ -1098,7 +1200,7 @@ Below we show an example showing how various numbers of records might fit into t
 > on a nearby Block that has enough free space to accommodate the lengthened record.
 
 > [!NOTE]
-> When a record is lengthened, it may be necessary to convert it from a normal varaible-length
+> When a record is lengthened, it may be necessary to convert it from a normal variable-length
 > record to a segmented one. When a record is shortened - at least in theory - a segmented record
 > might qualify to be converted to a normal variable-length record. Whether we implement this latter
 > conversion remains to be seen. There is no hard reason to object against having shortened VS record
@@ -1464,3 +1566,8 @@ Free space on any block is maintained in a single extent, usually but not necess
 Additionally, there may be empty records on the block. These are marked with the `RPTR_MTY` bit in their RPTR list entry.
 These empty record slots are available for reuse and may (if needed) be merged with each other and with the available
 free space on the block to create a larger area of free space to satisfy an allocation request.
+
+
+# TODO:
+
+- define and describe the overflow chain
