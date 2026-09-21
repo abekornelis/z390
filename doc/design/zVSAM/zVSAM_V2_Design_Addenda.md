@@ -936,3 +936,40 @@ All fields are 8 bytes except `CTRAVGRL` which is 4 bytes.
 |            |            |                                                           | For RRDS, empty slots are not included                                                |
 | CTRLOKEY   | Data only  | Yes                                                       | KSDS only. Update when a lower key is added or this key is deleted                    |
 
+### ELIX Block
+
+> [!NOTE]
+> The ELIX was introduced for managing AIX data records with an extremely large number of synonyms.
+> Although it is an elegant solution, we will not implement the ELIX at this point in time.
+> In the first place, AIX design should not allow for very large numbers of synonyms. Extend your AIX key if you can.
+> In the second place, creating ELIX support is a considerable effort spent on solving a niche problem
+> that should not occur in the first place. Maybe, if you do create an AIX with extreme numbers of
+> synonyms, bad performance is simply part of the price for having a badly designed index structure.
+> We keep the design paragraph here in honour of its author, Melvyn Maltz.
+
+A single ELIX block is created for each non-unique AIX record that is segmented.
+It has the same blocksize as a Data record.
+
+zVSAM lifts the current IBM restriction of 32K elements in a non-unique AIX record, because of this there
+may be many segments to read to find an element to delete or an insertion point for a new record.
+
+The ELIX Block provides an extra index on the segments and contains the highest element in each segment.
+As there is currently only one ELIX Block per AIX key this places a limit on the number of elements.
+
+When a non-unique AIX is built zREPRO will issue a message on the log like this:
+`zREPRO AIX MAX ELEMENT LIMIT 87654`
+If the number of elements is too low then rebuild the AIX with a larger blocksize.
+
+IBM does not maintain elements in any particular order but for the ELIX structure to work zVSAM will
+maintain elements in sequence.
+
+![Diagram showing layout of an ELIX Block](img/zVSAM_V2_Drawing_Block_Type_ELIX.jpg)
+
+The ELIX record has the following format:
+
+| AIX on | Record Format                                                             |
+|--------|---------------------------------------------------------------------------|
+| ESDS   | Highest Base XLRA followed by the XLRA of the segment (always record 1)   |
+| KSDS   | Highest Primary key followed by the XLRA of the segment (always record 1) |
+| RRDS   | Highest RRN followed by the XLRA of the segment (always record 1)         |
+

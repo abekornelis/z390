@@ -441,63 +441,6 @@ The following figure shows a contrived example of how the different types of blo
 
 ![Diagram showing Blocks in a KSDS Index component](img/zVSAM_V2_File_KSDS_Index.jpg)
 
-#### Index Blocks
-
-The index blocks of a KSDS index component contain index entries, which consist of
-a primary key and its XLRA. The index is organized in a hierarchy of index levels.
-
-Each index Block has an RPTR area, allocated right after the Block Header.
-Eazch RPTR entry contains an in-block offset to the record.
-Additionally, the RPTR contains flags to identify the type and status of each record.
-`RPTR_END` marks the end of record pointers in this block.
-
-The records are allocated from the end of the block downwards to consolidate free space at the centre.
-
-For Level 0 each record is the key (KSDS), or RRN (RRDS) of the base record and is followed by an XLRA.
-The XLRA is a record pointer that is valid for the cluster's Data component.
-
-For other levels, each record pointer is the highest key or RRN followed by an XLRA.
-These XLRAs are block pointers that are valid for the cluster's Inex component.
-
-As each index record is a fixed size it is recommended to specify `INDEXADJUST=YES` to avoid unusable
-free space
-
-#### Index Block Structure: Single level
-
-This example shows an index of only one block, holding two record pointers
-
-![Diagram showing layout of a Chain of 1 Index Block](img/zVSAM_V2_Chain_Index_Blocks_1.jpg)
-
-#### Index Block Structure: Two Levels
-
-This example shows the index after adding three more record pointers, causing the only index block to overflow and
-split. Now there are two leaf blocks, still on the LVL0 chain, and a new root block has been created on the
-LVL1 chain
-
-![Diagram showing layout of a Chain of 2 Index Blocks](img/zVSAM_V2_Chain_Index_Blocks_2.jpg)
-
-#### Index Block Level 0
-
-![Diagram showing layout of a Leaf Index Block](img/zVSAM_V2_Block_Type_Index_Leaf.jpg)
-
-Note how each index record points to a data record. It contains the record's key (shown in the drawing)
-and its XLRA (not shown in the drawing).
-
-#### Index Block other levels
-
-![Diagram showing layout of a Non-Leaf Index Block](img/zVSAM_V2_Block_Type_Index_NLeaf.jpg)
-
-Note how each index record points to an index data block in the next layer of the index.
-Each index record contains that block's highest key (shown in the drawing)
-and its XLRA (not shown in the drawing).
-
-It is possible to reserve an amount of freespace at load time which also applies if a block is split.
-It is specified in the catalog as `INDEXFREESPACE=nn`, where nn is a percentage of the available space.
-
-For all types of fixed non-spanned datasets, the available space may not be a multiple of the index record size
-resulting in unusable space. To correct this use `INDEXADJUST=YES` which will calculate an optimal
-blocksize less than the specified one.
-
 ### RRDS Data Organization
 
 A RRDS data component consists of a Prefix block and a Spacemap block followed by Data blocks and possibly Segment blocks as needed.
@@ -1208,108 +1151,139 @@ What the diagram shows:
 
 ### AIX Unique
 
-AIX data records for a Unique Alternate Index have fixed-length records.
-The AIX cluster is mostly treated as a KSDS with a record type of F.
+AIX data records for a Unique Alternate Index consist of an Alternate Key value
+and the single primary key value (KSDS), RRN (RRDS) or XLRA (ESDS) of the data record.
+
+AIX unique records have the following format:
+
+| AIX on | Record Format                      |
+|--------|------------------------------------|
+| ESDS   | AIX key, followed by 1 XLRA        |
+| KSDS   | AIX key, followed by 1 primary key |
+| RRDS   | AIX key, followed by 1 RRN         |
+
+This means that a Unique AIX has fixed-length records, and
+the AIX cluster is mostly treated as a KSDS with a record type of F.
+
 Only when the AIX is opened as a path, will zVSAM use the AIX data to retrieve
 records from the underlying base cluster.
 
 Below we show an example showing how various numbers of records might fit into a unique AIX's data block
 
-![Diagram showing layout of an AIX Data Block](img/zVSAM_V2_Drawing_Block_Type_AIX_Unique.jpg)
+![Diagram showing layout of a Unique AIX Data Block](img/zVSAM_V2_Block_Type_AIX_Unique.jpg)
+
+What the diagram shows:
+- block header and block footer in blue at beginning and end of block
+- RPTR list in violet following the block header immediately
+- records in white, allocated from the block footer towards the lower end of the block
+- each record consisting of an Alternate Key value, followed by its associated Primary Key value
+- left-over free space in green filling the area between the RPTR list and the records
+- free space in green filling the area between records 6 and 8; this area was used for record 7 which has been deleted
+- free space in green filling the area between records 3 and 5; this area was used for record 4 which has been deleted
+- free space has not yet been consolidated - remaining free space is enough to accommodate another record, whether consolidated or not
+- elements are not to scale; yet all records are shown equal in size
+
+What the diagram does not show:
+- the index structure of the AIX
+- the relationship with the base cluster
+
+| Function     | Notes                                              |
+|--------------|----------------------------------------------------|
+| Add          | When record is added to base cluster               |
+| Update       | When XLRA of base record changes                   |
+| Delete       | When record is deleted from base cluster           |
+| Add + Delete | When alternate key value in base record changes    |
+| Length       | change n/a                                         |
+| Access by    | See KSDS. May also be opened as a Path             |
 
 > [!NOTE]
-> The drawing shows V-type records. Must be fixed.
+> Over time, add/delete operations may cause records to appear out-of-sequence on the block.
+> The logical sequence of the records and slots is defined by the RPTR list,
+> not by their physical order within the block.
 
-### AIX Non-unique not segmented
+### AIX Non-unique
 
-AIX non-unique non-segmented records have the following format:
+AIX data records for a Non-Unique Alternate Index consist of an Alternate Key value
+and a list of primary key values (KSDS), RRNs (RRDS) or XLRAs (ESDS) of the data record(s).
 
-| AIX on ... | Record Format                                             |
-|------------|-----------------------------------------------------------|
-| ESDS       | AIX key, an element count n(4) followed by n XRBAs(n\*8)  |
-| KSDS       | AIX key, an element count n(4) followed by n primary keys |
-| RRDS       | AIX key, an element count n(4) followed by n RRNs         |
+AIX non-unique records have the following format:
+
+| AIX on | Record Format                                             |
+|--------|-----------------------------------------------------------|
+| ESDS   | AIX key, an element count n(4) followed by n XLRAs        |
+| KSDS   | AIX key, an element count n(4) followed by n primary keys |
+| RRDS   | AIX key, an element count n(4) followed by n RRNs         |
+
+Since the number of primary keys on the record has no limit, other than
+the maximum number that can be represented as a 4-byte value, this means that
+a Non-Unique AIX must have variable-length spanned records, and
+the AIX cluster is mostly treated as a KSDS with a record type of VS.
+
+Only when the AIX is opened as a path, will zVSAM use the AIX data to retrieve
+records from the underlying base cluster.
 
 Below we show an example showing how various numbers of records might fit into a non-unique AIX's data block
 
-![Diagram showing layout of an unsegmented AIX Data Block](img/zVSAM_V2_Drawing_Block_Type_AIX_Unseg.jpg)
+![Diagram showing layout of an Non-Unique AIX Data Block](img/zVSAM_V2_Drawing_Block_Type_AIX_NonUnique.jpg)
+
+What the diagram shows:
+- a single data block with:
+    - block header and block footer in blue at beginning and end of the block
+    - RPTR list in violet following the block header immediately on the data block
+    - DRPs and records in white on the data block; records are preceded by a RLF; DRPs are not preceded by a RLF
+    - left-over free space in green filling the area between the RPTR list and the DRP / record data
+    - free space in green filling the area between record 3 and DRP 5, marking the area where record 4 was stored before it got deleted
+    - free space has not been consolidated - it will be consolidated when needed
+    - elements are not to scale; yet all DRPs are shown equal in size
+- two segment blocks, holding a single record:
+    - block header and block footer in blue at beginning and end of each block
+    - no RPTR list on any segment block
+    - a single SPX preceding each segment, a first and last SPX are shown; no middle SPX in this example
+    - the RLF follows the first segment's SPX, preceding actual record data
+    - segments in white, allocated from the block footer towards the lower end of the block
+    - primary key values never span a segment boundary; some free space may be left over in any segment
+    - left-over free space in green filling the area between the block header and the segment's SPX on both segments
+    - remaining free space is unusable, except for lengthening the record (addition of more primary key values)
+    - there is no free space in the middle of a segment - removal of a primary key value causes the segment to shrink.
+    - elements are not to scale
+
+What the diagram does not show:
+- the index structure of the AIX
+- the relationship with the base cluster
+
+| Function     | Notes                                              |
+|--------------|----------------------------------------------------|
+| Add          | When new alternate key is added to base cluster    |
+| Update       | When nr of primary keys changes                    |
+| Delete       | When primary key count drops to zero               |
+| Length       | When nr of primary keys changes                    |
+| Access by    | See KSDS. May also be opened as a Path             |
 
 > [!NOTE]
-> This paragraph should probably be deleted. For a Non-Unique key you never knwo
-> what the maximum number of synonyms in the base cluster will be. An AIX data record
-> with a large number of synonyms may exceed Block capacity, requiring the AIX data
-> record to be split into segments. An unsegmented non-unique AIX does not seem to make sense.
-
-### AIX Non-unique segmented
-
-AIX non-unique segmented records have the following formats:
-
-| AIX on ... | Record Format of FIRST segment                                                        |
-|------------|---------------------------------------------------------------------------------------|
-| ESDS       | SPX, AIX key, an element count(4) which is the total no. of elements in all segments. |
-|            | The actual number of XLRAs in this segment can be calculated from `SPXSEGLN`          |
-| KSDS       | SPX, AIX key, an element count(4) which is the total no. of elements in all segments. |
-|            | The actual number of primary keys in this segment can be calculated from `SPXSEGLN`   |
-| RRDS       | SPX, AIX key, an element count(4) which is the total no. of elements in all segments. |
-|            | The actual number of RRNs in this segment can be calculated from `SPXSEGLN`           |
-
-| AIX on ... | Record Format of MIDDLE or LAST segments                                              |
-|------------|---------------------------------------------------------------------------------------|
-| ESDS       | SPX and a number of XLRAs.                                                            |
-|            | The actual number of XLRAs in this segment can be calculated from `SPXSEGLN`          |
-| KSDS       | SPX and a number of primary keys.                                                     |
-|            | The actual number of primary keys in this segment can be calculated from `SPXSEGLN`   |
-| RRDS       | SPX and a number of RRNs.                                                             |
-|            | The actual number of RRNs in this segment can be calculated from `SPXSEGLN`           |
-
-Below we show an example showing how various numbers of records might fit into a non-unique AIX's data block
-
-![Diagram showing layout of a Segmented AIX Data Block](img/zVSAM_V2_Drawing_Block_Type_AIX_Seg.jpg)
-
-> [!NOTE]
-> Each segment contains a whole number of elements.
-
-### ELIX Block
-
-> [!NOTE]
-> The ELIX was introduced for managing AIX data records with an extremely large number of synonyms.
-> Although it is an elegant solution, we should seriously consisder NOT to implement the ELIX.
-> In the first place, AIX design should not allow for very large numbers of synonyms. Extend your AIX key if you can.
-> In the second place, creating ELIX support is a considerable effort spent on solving a niche problem
-> that should not occur in the first place. Maybe, if you do create an AIX with extreme numbers of
-> synonyms, bad performance is simply part of the price for having a badly designed index structure.
-
-A single ELIX block is created for each non-unique AIX record that is segmented.
-It has the same blocksize as a Data record.
-
-zVSAM lifts the current IBM restriction of 32K elements in a non-unique AIX record, because of this there
-may be many segments to read to find an element to delete or an insertion point for a new record.
-
-The ELIX Block provides an extra index on the segments and contains the highest element in each segment.
-As there is currently only one ELIX Block per AIX key this places a limit on the number of elements.
-
-When a non-unique AIX is built zREPRO will issue a message on the log like this:
-`zREPRO AIX MAX ELEMENT LIMIT 87654`
-If the number of elements is too low then rebuild the AIX with a larger blocksize.
-
-IBM does not maintain elements in any particular order but for the ELIX structure to work zVSAM will
-maintain elements in sequence.
-
-![Diagram showing layout of an ELIX Block](img/zVSAM_V2_Drawing_Block_Type_ELIX.jpg)
-
-The ELIX record has the following format:
-
-| AIX on ... | Record Format                                                             |
-|------------|---------------------------------------------------------------------------|
-| ESDS       | Highest XRBA followed by the XLRA of the segment (always record 1)        |
-| KSDS       | Highest Primary key followed by the XLRA of the segment (always record 1) |
-| RRDS       | Highest RRN followed by the XLRA of the segment (always record 1)         |
+> Over time, add/delete/length-changing update operations may cause records to appear out-of-sequence on the data block.
+> The logical sequence of the records and slots is defined by the RPTR list,
+> not by their physical order within the block.
 
 ### LDS Blocks
 
 LDS Blocks have no structure imposed by zVSAM. The entire data block is treated as user data.
 There is no Block Header, Block Footer, and no RPTR list. Just user data; as many bytes of
 user data as the block size indicates. LDS blocks can be addressed only by their XLRA Block pointer.
+
+Below we show an example of an LDS block
+
+![Diagram showing layout of an LDS Block](img/zVSAM_V2_Drawing_Block_Type_LDS.jpg)
+
+What the diagram shows:
+- a single data block without any imposed or pre-defined structure. Any structure in the data is defined and implemented by the application.
+
+| Function     | Notes                                              |
+|--------------|----------------------------------------------------|
+| Add          | Append only                                        |
+| Update       | Yes                                                |
+| Delete       | No                                                 |
+| Length       | cannot be changed                                  |
+| Access by    | Sequence or XLRA                                   |
 
 ## Block Structures
 
@@ -1341,16 +1315,14 @@ Block Headers are formatted as follows:
 | BHDR_LEF |        | =X'04'     | Index leaf Block                      |
 | BHDR_INT |        | =X'02'     | Index intermediate block              |
 | BHDR_ROT |        | =X'01'     | Index root block                      |
-| BHDR#REC | X'006' | XL1        | Nr of records on this block           |
-| BHDRXLVL | X'007' | XL1        | Index level                           |
+| BHDR#REC | X'006' | XL2        | Nr of records on this block           |
 | BHDRSELF | X'008' | XL8        | XLRA of this block                    |
 | BHDRNEXT | X'010' | XL8        | XLRA of next block on chain           |
 | BHDRPREV | X'018' | XL8        | XLRA of previous block on chain       |
 | BHDRFRE@ | X'020' | XL3        | Offset of free area on this block     |
-| BHDRFLG2 | X'023' | XL1        | Flags                                 |
-| BHDR_ELX |        | =X'80'     | ELIX block                            |
-| BHDRFREE | X'024' | XL3        | Length of free area on this block     |
-|          |        | XL2        | Reserved                              |
+| BHDRFREE | X'023' | XL3        | Length of free area on this block     |
+| BHDRXLVL | X'026' | XL1        | Index level                           |
+|          | X'027' | XL1        | Reserved                              |
 
 `BHDRSEQ#` is incremented by one every time the block is written out to the file.
 The footer area contains a comparable field: `BFTRSEQ#`. Together they guard against incomplete writes.
@@ -1369,45 +1341,12 @@ For the prefix block, these two fields are set to foxes.
 on the `BHDRFLAG` setting, and, if this is an index block, by the `BHDRXLVL` value.
 For the prefix block, these two fields are set to foxes.
 
-> [!NOTE]
-> Melvyn added that:
-> Free blocks are not on any chain, for these blocks the `BHDRPREV`/`BHDRNEXT` pointers can have any value.
-> - we need to re-evaluate whether or not the performance gain is worth the imbalance in design and the increased vulnerability.
+Free blocks are not on any chain, for these blocks the `BHDRPREV`/`BHDRNEXT` pointers can have any value.
 
 Segmented records are a special case. Segments of a segmented record never share their block with other data.
-The block holding the first segment is part of the data chain. A block holding a non-first segment is part
-of the segment chain. A block that holds a record's first segment has an SPX pointing to the block holding
-the second segment. Subsequent segments are retrieved by following the SPXs to the last segment of the record
-
-> [!NOTE]
-> Melvyn suggested:
-> From the second segment the `BHDRPREV`/`BHDRNEXT` chain can be used to sequentially read subsequent segments up to the last segment of the record.
-> - I think we need to re-evaluate whether to follow this scheme, or to ues the SPX chain consistently.
-> - If we follow Melvyn's line of reasoning, then the following paragraph should be removed.
-
-The Segment chain starting at `PFXBSEGM` and ending at `PFXESEGM` has no role in processing a spanned
-dataset but just provides an extra integrity check.
-
-### Data blocks
-
-Each record has an Record Pointer List (RPTR block). The RPTR immediately follows the Block Header.
-In addition to the offset, the RPTR contains flags to identify the type and status of each record.
-`RPTR_END` marks the end of records in this block.
-
-The records are allocated from the other end of the block (preceding the Footer area) to consolidate free space at the centre.
-
-![Diagram showing layout of a Data Block](img/zVSAM_V2_Drawing_Block_Type_Data.jpg)
-
-It is possible to reserve an amount of freespace at load time which also applies if a block is split.
-It is specified in the catalog as `DATAFREESPACE=nn`, where nn is a percentage of the available space.
-Only a fixed non-spanned KSDS can specify free space.
-
-For all types of fixed non-spanned datasets, the available space may not be a multiple of the data record size
-resulting in unusable space. To correct this use `DATAADJUST=YES` which will calculate an optimal
-blocksize less than the specified one.
-
-How the Data Blocks are laid out in the file depends on whether the cluster is defined with Spanned records,
-or with unspanned records.
+All segment blocks are on the segment chain. The DRP that represents the record and its position on the
+data block points to the first segment block of the record. Subsequent segments are retrieved by following
+the segment chain until a segment is encounterd with an SPX that indicates it is the last segment of the record.
 
 ### Block Footer
 
@@ -1422,50 +1361,6 @@ It is formatted as follows:
 
 `BFTRSEQ#` is incremented by one every time the block is written out to the file.
 The header area contains a comparable field: `BHDRSEQ#`. Together they guard against incomplete writes.
-
-### Record Pointer List
-
-Every block that contains data records contains a record list (`ZVSAMRPT`).
-Records are accessible only through their Record Pointer or RPTR.
-Every entry in the list corresponds with a single record on the block.
-The last byte of a record's XLRA is the index into the Record Pointer List.
-Index value of X'00' is reserved for block pointers; values X'01' through X'FF' inclusive are usable as RPTR index values.
-The difference of 1 always needs to be taken into account when indexing the RPTR list.
-
-The RPTR list always follows the block header directly.
-
-The number of entries on the RPTR list varies with the number of records stored on the block (`BHDR#REC`)
-and is terminated by `RPTR_END` to mark the end of the list.
-
-Record Pointer List entries are formatted as follows:
-
-| Label    | Offset | Field type | Function                                                |
-|----------|--------|------------|---------------------------------------------------------|
-| ZVSAMRPT |        | DSECT      | Record Pointer                                          |
-| RPTRFLGS | X'000' | XL1        | Flag byte                                               |
-| RPTR_ACT |        | =X'80'     | Active record                                           |
-| RPTR_MTY |        | =X'40'     | Empty record slot                                       |
-| RPTR_DIS |        | =X'20'     | Record has been displaced to another block              |
-| RPTR_MOV |        | =X'10'     | New location of a moved record                          |
-| RPTR_SEG |        | =X'08'     | Record segment                                          |
-| RPTR_END |        | =X'01'     | Terminating entry                                       |
-| RPTRREC@ | X'001' | AL3        | Record offset within block - foxes when RPTR_END is set |
-
-`RPTR_ACT` and `RPTR_MTY` are mutually exclusive. Either one must be set, otherwise the RPTR list is compromised and data access will fail.
-
-When `RPTR_END` is set, `RPTRREC@` is set to foxes. `RPTR_MTY` indicates an empty RRDS slot or a logically deleted record in an ESDS, KSDS, or AIX.
-
-When `RPTR_DIS` is set, the RPTR addresses a Displaced Record Pointer, rather than the actual data.
-The format of a Displaced Record Pointer is as follows:
-
-| Label    | Offset | Field type | Function                                       |
-|----------|--------|------------|------------------------------------------------|
-| ZVSAMDRP |        | DSECT      | Displaced Record Pointer                       |
-| DRPIXLRA | X'000' | XL8        | Indirect XLRA = location of actual record data |
-
-### Record data
-
-### Free Space
 
 ### Prefix Area
 
@@ -1482,12 +1377,20 @@ Their exact addresses on the prefix block may vary:
 - `PFXDVOL@` and `PFXXVOL@` contain foxes (future option)
 
 The `PFXCTRS@` pointer addresses a separate area that holds various counters.
+The `PFXRRNS` pointer addresses the RRN list if the cluster is a RRDS.
 
 The Counters area (`ZVSAMCTR`) directly follows the Prefix area on the Prefix Block, it is doubleword aligned.
 This area is expected to move into the catalog dataset in a future release.
 The overall structure of the prefix block would look something like this (areas not to scale):
 
-![Diagram showing layout of a Prefix Block](img/zVSAM_V2_Drawing_Block_Type_Prefix.jpg)
+![Diagram showing layout of a Prefix Block](img/zVSAM_V2_Block_Type_Prefix.jpg)
+
+What the diagram shows:
+- block header and block footer in blue at beginning and end of the block
+- the prefix area, immediately followed by the counters area
+- left-over free space in green
+- other fields addressed from the prefix area
+- elements are not to scale; yet all DRPs are shown equal in size
 
 The addenda part of this document contains more details on the [prefix area](zVSAM_V2_Design_Addenda.md.md#prefix-area).
 
@@ -1497,6 +1400,11 @@ The addenda part of this document contains more details on the [counters area](z
 and its maintenance.
 
 ### RRN map
+
+The RRN map is used to map RRN ranges to XLRA ranges.
+- Each data block in the RRDS holds a fixed number of record slots
+- Each range of contiguously allocated data blocks is represented by a single entry on the RRN map
+- Each entry contains the starting block XLRA, the number of blocks in the range, and the starting RRN value
 
 ### Spacemap
 
@@ -1537,27 +1445,145 @@ The bits in the `MAPBITS` array are encoded as follows:
 | B'00' | block is not allocated. I.e. the block resides on no chain. The block's `BHDRNEXT`/`BHDRPREV` fields are meaningless.                                                                                                                                                       |
 | B'01' | block is allocated but may have insufficient free space. I.e. last allocation attempt failed, but a smaller record might fit. Or last allocation succeeded but left fewer than `CTRAVGRL` bytes of free space. Not used for blocks holding a segment of a segmented record. |
 | B'10' | block is allocated and eligible for record allocation. i.e. last allocation succeeded and left enough free space for a record of average size. (`CTRAVGRL`) Not used for blocks holding a segment of a segmented record.                                                    |
-| B'11' | Nothing can be allocated to this block. i.e. last allocation attempt failed, block holds a segment of a segmented record, block is an ELIX block, or block is a spacemap block.                                                                                             |
+| B'11' | Nothing can be allocated to this block. i.e. last allocation attempt failed, block holds a segment of a segmented record, or block is a spacemap block.                                                                                                                     |
 
 Conceptually, the overall structure of a spacemap block would look something like this (areas not to scale):
 
-![Diagram showing layout of a Spacemap Block](img/zVSAM_V2_Drawing_Block_Type_Spacemap.jpg)
+![Diagram showing layout of a Spacemap Block](img/zVSAM_V2_Block_Type_Spacemap.jpg)
 
-#### Segment Prefix
+What the diagram shows:
+- block header and block footer in blue at beginning and end of the block
+- the spacemap area, covering all remaining space on the block
+- the XLRA that sits at the beginning of the spacemap area
+- no free space available
+- elements are not to scale; yet all DRPs are shown equal in size
 
-> [!NOTE]
-> Segment prefixes were introduced by Melvyn. Whether they are needed depends on how we decide
-> to implement segmented records.
+### Data blocks
 
-All segments begin with a segment prefix or SPX (`ZVSAMSEG`).
-The first segment is on the Data chain and subsequent segments are retrieved via `SPXBNEXT`.
-The flag `SPXSEGCC` indicates the first, middle or last segments.
+Each record has an Record Pointer List (RPTR block). The RPTR immediately follows the Block Header.
+In addition to the offset, the RPTR contains flags to identify the type and status of each record.
+`RPTR_END` marks the end of records in this block.
 
-Alternative designs handle organize the segments and their pointers differently.
+The records are mostly allocated from the other end of the block (preceding the Footer area) to consolidate free space at the centre.
 
-> [!NOTE]
-> A design choice is yet to be made. Whichever variant we choose, we'll
-> ahve to thoroughly check the design documents and the code Melvyn has already written.
+![Diagram showing layout of a Data Block](img/zVSAM_V2_Block_Type_Data.jpg)
+
+What the diagram shows:
+- block header and block footer in blue at beginning and end of block
+- RPTR list in violet following the block header immediately
+- records in white, allocated from the block footer towards the lower end of the block
+- left-over free space in green filling the area between the RPTR list and the records
+- each RPTR entry except the trailing `RPTR_END` entry points to a record that could be anywhere on the block
+- elements are not to scale; yet all records are shown equal in size
+
+It is possible to reserve an amount of freespace at load time which also applies if a block is split.
+It is specified in the catalog as `DATAFREESPACE=nn`, where nn is a percentage of the available space.
+
+For all types of fixed non-spanned datasets, the available space in a data block may not be a multiple of the data record size
+resulting in unusable space. To correct this use `DATAADJUST=YES` which will calculate an optimal
+blocksize less than the specified one. Howeever, having a block size that is not a multiple of the
+sector size of the physical storage media may have an adverse effect on performance.
+
+How the Data Blocks are laid out in the file depends on whether the cluster is defined with Spanned records,
+or with unspanned records.
+
+### Record Pointer List
+
+Every block that contains data records contains a record list (`ZVSAMRPT`).
+Records are accessible only through their Record Pointer or RPTR.
+
+Every entry in the list corresponds with a single record on the block.
+The last bits of a record's XLRA is the index into the Record Pointer List.
+Index value of binary zeroes is reserved for block pointers; all other values are usable as RPTR index values.
+The difference of 1 always needs to be taken into account when indexing the RPTR list.
+
+The RPTR list always follows the block header directly.
+
+The number of entries on the RPTR list varies with the number of records stored on the block (`BHDR#REC`)
+and is terminated by `RPTR_END` to mark the end of the list.
+
+Record Pointer List entries are formatted as follows:
+
+| Label    | Offset | Field type | Function                                                |
+|----------|--------|------------|---------------------------------------------------------|
+| ZVSAMRPT |        | DSECT      | Record Pointer                                          |
+| RPTRFLGS | X'000' | XL1        | Flag byte                                               |
+| RPTR_ACT |        | =X'80'     | Active record                                           |
+| RPTR_MTY |        | =X'40'     | Empty record slot                                       |
+| RPTR_DIS |        | =X'20'     | Record has been displaced to another block              |
+| RPTR_MOV |        | =X'10'     | New location of a moved record                          |
+| RPTR_SEG |        | =X'08'     | Record segment                                          |
+| RPTR_END |        | =X'01'     | Terminating entry                                       |
+| RPTRREC@ | X'001' | AL3        | Record offset within block - foxes when RPTR_END is set |
+
+`RPTR_ACT` and `RPTR_MTY` are mutually exclusive. Either one must be set, otherwise the RPTR list is compromised and data access will fail.
+
+When `RPTR_END` is set, `RPTRREC@` is set to foxes. `RPTR_MTY` indicates an empty RRDS slot or a logically deleted record in an ESDS, KSDS, or AIX.
+
+When `RPTR_DIS` is set, the RPTR addresses a Displaced Record Pointer, rather than the actual data.
+The format of a Displaced Record Pointer is as follows:
+
+| Label    | Offset | Field type | Function                                       |
+|----------|--------|------------|------------------------------------------------|
+| ZVSAMDRP |        | DSECT      | Displaced Record Pointer                       |
+| DRPIXLRA | X'000' | XL8        | Indirect XLRA = location of actual record data |
+
+#### Index Blocks
+
+The index blocks of a KSDS index component contain index entries, which consist of
+a primary key and its XLRA. The index is organized in a hierarchy of index levels.
+
+Each index Block has an RPTR area, allocated right after the Block Header.
+Eazch RPTR entry contains an in-block offset to the record.
+Additionally, the RPTR contains flags to identify the type and status of each record.
+`RPTR_END` marks the end of record pointers in this block.
+
+The records are allocated from the end of the block downwards to consolidate free space at the centre.
+
+For Level 0 each record is the key (KSDS), or RRN (RRDS) of the base record and is followed by an XLRA.
+The XLRA is a record pointer that is valid for the cluster's Data component.
+
+For other levels, each record pointer is the highest key or RRN followed by an XLRA.
+These XLRAs are block pointers that are valid for the cluster's Inex component.
+
+As each index record is a fixed size it is recommended to specify `INDEXADJUST=YES` to avoid unusable
+free space
+
+#### Index Block Structure: Single level
+
+This example shows an index of only one block, holding two record pointers
+
+![Diagram showing layout of a Chain of 1 Index Block](img/zVSAM_V2_Chain_Index_Blocks_1.jpg)
+
+#### Index Block Structure: Two Levels
+
+This example shows the index after adding three more record pointers, causing the only index block to overflow and
+split. Now there are two leaf blocks, still on the LVL0 chain, and a new root block has been created on the
+LVL1 chain
+
+![Diagram showing layout of a Chain of 2 Index Blocks](img/zVSAM_V2_Chain_Index_Blocks_2.jpg)
+
+#### Index Block Level 0
+
+![Diagram showing layout of a Leaf Index Block](img/zVSAM_V2_Block_Type_Index_Leaf.jpg)
+
+Note how each index record points to a data record. It contains the record's key (shown in the drawing)
+and its XLRA (not shown in the drawing).
+
+#### Index Block other levels
+
+![Diagram showing layout of a Non-Leaf Index Block](img/zVSAM_V2_Block_Type_Index_NLeaf.jpg)
+
+Note how each index record points to an index data block in the next layer of the index.
+Each index record contains that block's highest key (shown in the drawing)
+and its XLRA (not shown in the drawing).
+
+It is possible to reserve an amount of freespace at load time which also applies if a block is split.
+It is specified in the catalog as `INDEXFREESPACE=nn`, where nn is a percentage of the available space.
+
+For all types of fixed non-spanned datasets, the available space may not be a multiple of the index record size
+resulting in unusable space. To correct this use `INDEXADJUST=YES` which will calculate an optimal
+blocksize less than the specified one.
 
 ### Free Space
 
@@ -1567,6 +1593,15 @@ Additionally, there may be empty records on the block. These are marked with the
 These empty record slots are available for reuse and may (if needed) be merged with each other and with the available
 free space on the block to create a larger area of free space to satisfy an allocation request.
 
+### XLRA
+
+The XLRA is an 8-byte value uniquely identifying either an entire block or a record within the cluster.
+
+By default, 8 bits are used to address a record on a block. This allows a maximum of 255 records on each block,
+and leaves 7 bytes to address the block within the cluster.
+
+In some cases zVSAM may decide to allocate more bits to the record portion of the XLRA,
+thereby reducing the number of blocks that might be allocated to the cluster.
 
 # TODO:
 
