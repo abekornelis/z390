@@ -3822,7 +3822,7 @@ which is intended for cluster-level information. These fields need to be moved t
 </tr>
 <tr>
 <td>NEXT</td>
-<td>value of extents of the data/index components (returns 1)</td>
+<td>value of extents of the data/index components (returns the number of physical files in the component)</td>
 </tr>
 <tr>
 <td>NINSR</td>
@@ -4008,7 +4008,7 @@ which is intended for cluster-level information. These fields need to be moved t
 </tr>
 <tr>
 <td>NEXT</td>
-<td>value of extents (last 4 bytes) From <code>CTRNEXT</code> (always 1)</td>
+<td>value of extents (last 4 bytes) From <code>CTRNEXT</code> (nr of physical files in the component)</td>
 </tr>
 <tr>
 <td>NINSR</td>
@@ -6156,7 +6156,10 @@ If they are issued before the ECB has been posted, unpredictable results may occ
 <h3 id="prefix-area">Prefix Area</h3>
 <p>The prefix area occurs only on the prefix block. It is located directly after the block header on the prefix block.
 No record pointer list lies in between.</p>
-<p>The prefix area contains basic structural information about the file. It has the following format:</p>
+<p>The prefix area contains basic structural information about the component. It is split into two parts:
+- the file prefix area occurs on every file's prefix Block
+- the component prefix area occurs only on the prefix block of a component's first file.</p>
+<p>The file prefix area has the following format:</p>
 <table>
 <thead>
 <tr>
@@ -6168,19 +6171,19 @@ No record pointer list lies in between.</p>
 </thead>
 <tbody>
 <tr>
-<td>ZVSAMPFX</td>
+<td>ZVSAMFPFX</td>
 <td></td>
 <td>DSECT</td>
 <td>Prefix area</td>
 </tr>
 <tr>
-<td>PFXEYE</td>
+<td>PFXFEYE</td>
 <td>X'000'</td>
 <td>CL4</td>
 <td>Eye catcher</td>
 </tr>
 <tr>
-<td>PFXZPFX</td>
+<td>PFXFZPFX</td>
 <td></td>
 <td>=C'zPFX'</td>
 <td></td>
@@ -6204,110 +6207,164 @@ No record pointer list lies in between.</p>
 <td>key offset, excluding SPX/RLF</td>
 </tr>
 <tr>
-<td>PFXCTRS@</td>
-<td>X'010'</td>
-<td>XL2</td>
-<td>offset to counters area ZVSAMCTR</td>
-</tr>
-<tr>
 <td>PFXDVOL@</td>
-<td>X'012'</td>
-<td>XL2</td>
-<td>offset to the data component's volume label</td>
-</tr>
-<tr>
-<td>PFXDNAM@</td>
-<td>X'014'</td>
-<td>XL2</td>
-<td>offset to the data component's filename</td>
+<td>X'010'</td>
+<td>XL3</td>
+<td>offset to the data component's volume label (first file)</td>
 </tr>
 <tr>
 <td>PFXDPAT@</td>
 <td>X'016'</td>
-<td>XL2</td>
-<td>offset to the data component's pathname</td>
+<td>XL3</td>
+<td>offset to the data component's pathname     (first file)</td>
+</tr>
+<tr>
+<td>PFXDNAM@</td>
+<td>X'013'</td>
+<td>XL3</td>
+<td>offset to the data component's filename     (first file)</td>
 </tr>
 <tr>
 <td>PFXXVOL@</td>
-<td>X'018'</td>
-<td>XL2</td>
-<td>offset to the index component's volume label</td>
+<td>X'019'</td>
+<td>XL3</td>
+<td>offset to the index component's volume label (first file)</td>
 </tr>
 <tr>
 <td>PFXXNAM@</td>
-<td>X'01A'</td>
-<td>XL2</td>
-<td>offset to the index component's filename</td>
+<td>X'01C'</td>
+<td>XL3</td>
+<td>offset to the index component's filename     (first file)</td>
 </tr>
 <tr>
 <td>PFXXPAT@</td>
-<td>X'01C'</td>
-<td>XL2</td>
-<td>offset to the index component's pathname</td>
+<td>X'01F'</td>
+<td>XL3</td>
+<td>offset to the index component's pathname     (first file)</td>
+</tr>
+<tr>
+<td>PFXPVOL@</td>
+<td>X'022'</td>
+<td>XL3</td>
+<td>offset to the component's previous file volume label</td>
+</tr>
+<tr>
+<td>PFXPNAM@</td>
+<td>X'025'</td>
+<td>XL3</td>
+<td>offset to the component's previous file filename</td>
+</tr>
+<tr>
+<td>PFXPPAT@</td>
+<td>X'028'</td>
+<td>XL3</td>
+<td>offset to the component's previous file pathname</td>
+</tr>
+<tr>
+<td>PFXNVOL@</td>
+<td>X'02B'</td>
+<td>XL3</td>
+<td>offset to the component's next file volume label</td>
+</tr>
+<tr>
+<td>PFXNNAM@</td>
+<td>X'02E'</td>
+<td>XL3</td>
+<td>offset to the component's next file filename</td>
+</tr>
+<tr>
+<td>PFXNPAT@</td>
+<td>X'031'</td>
+<td>XL3</td>
+<td>offset to the component's next file pathname</td>
+</tr>
+<tr>
+<td>PFXCPFX@</td>
+<td>X'034'</td>
+<td>XL3</td>
+<td>offset to component prefix area</td>
+</tr>
+<tr>
+<td>PFXCTRS@</td>
+<td>X'037'</td>
+<td>XL3</td>
+<td>offset to counters area ZVSAMCTR</td>
+</tr>
+<tr>
+<td>PFXFM@</td>
+<td>X'03A'</td>
+<td>XL3</td>
+<td>offset to file map</td>
+</tr>
+<tr>
+<td>PFXFME#</td>
+<td>X'03D'</td>
+<td>XL4</td>
+<td>Nr of entries in file map (present on this prefix block)</td>
 </tr>
 <tr>
 <td>PFXRM@</td>
-<td>X'01E'</td>
-<td>XL2</td>
-<td>offset to RRN map table</td>
+<td>X'041'</td>
+<td>XL3</td>
+<td>offset to RRN map</td>
 </tr>
 <tr>
 <td>PFXRME#</td>
-<td>X'020'</td>
-<td>XL2</td>
-<td>Nr of entries in RRN map table</td>
+<td>X'044'</td>
+<td>XL4</td>
+<td>Nr of entries in RRN map (present on this prefix block)</td>
 </tr>
 <tr>
 <td>PFXSLOTS</td>
-<td>X'022'</td>
-<td>XL2</td>
+<td>X'048'</td>
+<td>XL3</td>
 <td>Nr of slots per block (RRDS only)</td>
 </tr>
 <tr>
 <td>PFXIXLVL</td>
-<td>X'024'</td>
+<td>X'04B'</td>
 <td>XL1</td>
 <td>nr of index levels</td>
 </tr>
 <tr>
 <td>PFXALTHR</td>
-<td>X'025'</td>
+<td>X'04C'</td>
 <td>XL1</td>
 <td>allocation redrive threshold</td>
 </tr>
 <tr>
 <td>PFXRPTR#</td>
-<td>X'026'</td>
+<td>X'04D'</td>
 <td>XL1</td>
 <td>Nr of bits in RPTR index part of XLRA</td>
 </tr>
 <tr>
 <td>PFXFRSPC</td>
-<td>X'027'</td>
+<td>X'04E'</td>
 <td>XL1</td>
 <td>initial freespace % within block</td>
 </tr>
 <tr>
 <td>PFXFRBLK</td>
-<td>X'028'</td>
+<td>X'04F'</td>
 <td>XL2</td>
 <td>initial freespace blocks</td>
 </tr>
 <tr>
 <td>PFXFRINT</td>
-<td>X'02A'</td>
+<td>X'051'</td>
 <td>XL2</td>
 <td>initial freespace interval between free blocks</td>
 </tr>
 <tr>
 <td>PFXMAPOF</td>
-<td>X'02C'</td>
+<td>X'053'</td>
 <td>XL4</td>
 <td>offset within spacemap block to last used byte for allocation</td>
 </tr>
 <tr>
 <td>PFXFFLGS</td>
-<td>X'030'</td>
+<td>X'057'</td>
 <td>XL1</td>
 <td>file flags</td>
 </tr>
@@ -6349,7 +6406,7 @@ No record pointer list lies in between.</p>
 </tr>
 <tr>
 <td>PFXRFLGS</td>
-<td>X'031'</td>
+<td>X'058'</td>
 <td>XL1</td>
 <td>record flags</td>
 </tr>
@@ -6397,345 +6454,414 @@ No record pointer list lies in between.</p>
 </tr>
 <tr>
 <td>PFXAIXN</td>
-<td>X'032'</td>
+<td>X'059'</td>
 <td>XL1</td>
 <td>no. of AIX's on the upgrade set</td>
 </tr>
 <tr>
 <td></td>
-<td>X'033'</td>
-<td>XL1</td>
+<td>X'05A'</td>
+<td>XL6</td>
 <td>reserved</td>
 </tr>
 <tr>
 <td>PFXBLKSZ</td>
-<td>X'034'</td>
+<td>X'060'</td>
 <td>XL4</td>
 <td>blocksize used for this file (except prefix block)</td>
 </tr>
 <tr>
+<td></td>
+<td>X'064'</td>
+<td>XL4</td>
+<td>reserved</td>
+</tr>
+<tr>
 <td>PFXHXLRA</td>
-<td>X'038'</td>
+<td>X'068'</td>
 <td>XL8</td>
 <td>XLRA of highest allocated block</td>
 </tr>
 <tr>
-<td></td>
-<td>X'040'</td>
-<td>XL8</td>
-<td>reserved</td>
-</tr>
-<tr>
 <td>PFXMAPNW</td>
-<td>X'048'</td>
+<td>X'070'</td>
 <td>XL8</td>
 <td>XLRA of spacemap block last used for allocation</td>
 </tr>
 <tr>
-<td>PFXBMAP</td>
-<td>X'050'</td>
-<td>XL8</td>
-<td>XLRA of first spacemap block</td>
-</tr>
-<tr>
-<td>PFXEMAP</td>
-<td>X'058'</td>
-<td>XL8</td>
-<td>XLRA of last spacemap block</td>
-</tr>
-<tr>
-<td>PFXBDATA</td>
-<td>X'060'</td>
-<td>XL8</td>
-<td>XLRA of first data block</td>
-</tr>
-<tr>
-<td>PFXEDATA</td>
-<td>X'068'</td>
-<td>XL8</td>
-<td>XLRA of last data block</td>
-</tr>
-<tr>
-<td>PFXBOVFL</td>
-<td>X'070'</td>
-<td>XL8</td>
-<td>XLRA of first block on overflow chain</td>
-</tr>
-<tr>
-<td>PFXEOVFL</td>
-<td>X'078'</td>
-<td>XL8</td>
-<td>XLRA of last block on overflow chain</td>
-</tr>
-<tr>
-<td>PFXBSEGM</td>
-<td>X'080'</td>
-<td>XL8</td>
-<td>XLRA of first segment block</td>
-</tr>
-<tr>
-<td>PFXESEGM</td>
-<td>X'088'</td>
-<td>XL8</td>
-<td>XLRA of last segment block</td>
-</tr>
-<tr>
-<td></td>
-<td>X'090'</td>
-<td>XL8</td>
-<td>reserved</td>
-</tr>
-<tr>
-<td>PFXROOT</td>
-<td>X'098'</td>
-<td>XL8</td>
-<td>XLRA of root index block</td>
-</tr>
-<tr>
-<td>PFXBLVL0</td>
-<td>X'0A0'</td>
-<td>XL8</td>
-<td>XLRA of Header Block index level 0</td>
-</tr>
-<tr>
-<td>PFXELVL0</td>
-<td>X'0A8'</td>
-<td>XL8</td>
-<td>XLRA of End Block index level 0</td>
-</tr>
-<tr>
-<td>PFXBLVL1</td>
-<td>X'0B0'</td>
-<td>XL8</td>
-<td>XLRA of Header Block index level 1</td>
-</tr>
-<tr>
-<td>PFXELVL1</td>
-<td>X'0B8'</td>
-<td>XL8</td>
-<td>XLRA of End Block index level 1</td>
-</tr>
-<tr>
-<td>PFXBLVL2</td>
-<td>X'0C0'</td>
-<td>XL8</td>
-<td>XLRA of Header Block index level 2</td>
-</tr>
-<tr>
-<td>PFXELVL2</td>
-<td>X'0C8'</td>
-<td>XL8</td>
-<td>XLRA of End Block index level 2</td>
-</tr>
-<tr>
-<td>PFXBLVL3</td>
-<td>X'0D0'</td>
-<td>XL8</td>
-<td>XLRA of Header Block index level 3</td>
-</tr>
-<tr>
-<td>PFXELVL3</td>
-<td>X'0D8'</td>
-<td>XL8</td>
-<td>XLRA of End Block index level 3</td>
-</tr>
-<tr>
-<td>PFXBLVL4</td>
-<td>X'0E0'</td>
-<td>XL8</td>
-<td>XLRA of Header Block index level 4</td>
-</tr>
-<tr>
-<td>PFXELVL4</td>
-<td>X'0E8'</td>
-<td>XL8</td>
-<td>XLRA of End Block index level 4</td>
-</tr>
-<tr>
-<td>PFXBLVL5</td>
-<td>X'0F0'</td>
-<td>XL8</td>
-<td>XLRA of Header Block index level 5</td>
-</tr>
-<tr>
-<td>PFXELVL5</td>
-<td>X'0F8'</td>
-<td>XL8</td>
-<td>XLRA of End Block index level 5</td>
-</tr>
-<tr>
-<td>PFXBLVL6</td>
-<td>X'100'</td>
-<td>XL8</td>
-<td>XLRA of Header Block index level 6</td>
-</tr>
-<tr>
-<td>PFXELVL6</td>
-<td>X'108'</td>
-<td>XL8</td>
-<td>XLRA of End Block index level 6</td>
-</tr>
-<tr>
-<td>PFXBLVL7</td>
-<td>X'110'</td>
-<td>XL8</td>
-<td>XLRA of Header Block index level 7</td>
-</tr>
-<tr>
-<td>PFXELVL7</td>
-<td>X'118'</td>
-<td>XL8</td>
-<td>XLRA of End Block index level 7</td>
-</tr>
-<tr>
-<td>PFXBLVL8</td>
-<td>X'120'</td>
-<td>XL8</td>
-<td>XLRA of Header Block index level 8</td>
-</tr>
-<tr>
-<td>PFXELVL8</td>
-<td>X'128'</td>
-<td>XL8</td>
-<td>XLRA of End Block index level 8</td>
-</tr>
-<tr>
-<td>PFXBLVL9</td>
-<td>X'130'</td>
-<td>XL8</td>
-<td>XLRA of Header Block index level 9</td>
-</tr>
-<tr>
-<td>PFXELVL9</td>
-<td>X'138'</td>
-<td>XL8</td>
-<td>XLRA of End Block index level 9</td>
-</tr>
-<tr>
-<td>PFXBLVLA</td>
-<td>X'140'</td>
-<td>XL8</td>
-<td>XLRA of Header Block index level 10</td>
-</tr>
-<tr>
-<td>PFXELVLA</td>
-<td>X'148'</td>
-<td>XL8</td>
-<td>XLRA of End Block index level 10</td>
-</tr>
-<tr>
-<td>PFXBLVLB</td>
-<td>X'150'</td>
-<td>XL8</td>
-<td>XLRA of Header Block index level 11</td>
-</tr>
-<tr>
-<td>PFXELVLB</td>
-<td>X'158'</td>
-<td>XL8</td>
-<td>XLRA of End Block index level 11</td>
-</tr>
-<tr>
-<td>PFXBLVLC</td>
-<td>X'160'</td>
-<td>XL8</td>
-<td>XLRA of Header Block index level 12</td>
-</tr>
-<tr>
-<td>PFXELVLC</td>
-<td>X'168'</td>
-<td>XL8</td>
-<td>XLRA of End Block index level 12</td>
-</tr>
-<tr>
-<td>PFXBLVLD</td>
-<td>X'170'</td>
-<td>XL8</td>
-<td>XLRA of Header Block index level 13</td>
-</tr>
-<tr>
-<td>PFXELVLD</td>
-<td>X'178'</td>
-<td>XL8</td>
-<td>XLRA of End Block index level 13</td>
-</tr>
-<tr>
-<td>PFXBLVLE</td>
-<td>X'180'</td>
-<td>XL8</td>
-<td>XLRA of Header Block index level 14</td>
-</tr>
-<tr>
-<td>PFXELVLE</td>
-<td>X'188'</td>
-<td>XL8</td>
-<td>XLRA of End Block index level 14</td>
-</tr>
-<tr>
-<td>PFXBLVLF</td>
-<td>X'190'</td>
-<td>XL8</td>
-<td>XLRA of Header Block index level 15</td>
-</tr>
-<tr>
-<td>PFXELVLF</td>
-<td>X'198'</td>
-<td>XL8</td>
-<td>XLRA of End Block index level 15</td>
-</tr>
-<tr>
 <td>PFXDTSKC</td>
-<td>X'1A0'</td>
+<td>X'078'</td>
 <td>XL8</td>
 <td>STCK of data component creation</td>
 </tr>
 <tr>
 <td>PFXIXSKC</td>
-<td>X'1A8'</td>
+<td>X'080'</td>
 <td>XL8</td>
 <td>STCK of index component creation</td>
 </tr>
 <tr>
 <td>PFXDTSKU</td>
-<td>X'1B0'</td>
+<td>X'088'</td>
 <td>XL8</td>
 <td>STCK of last update to data component</td>
 </tr>
 <tr>
 <td>PFXIXSKU</td>
-<td>X'1B8'</td>
+<td>X'090'</td>
 <td>XL8</td>
 <td>STCK of last update to index component</td>
 </tr>
 <tr>
 <td>PFXDTMAP</td>
-<td>X'1C0'</td>
+<td>X'098'</td>
 <td>XL8</td>
 <td>STCK of last data spacemap update</td>
 </tr>
 <tr>
 <td>PFXIXMAP</td>
-<td>X'1C8'</td>
+<td>X'0A0'</td>
 <td>XL8</td>
 <td>STCK of last index spacemap update</td>
 </tr>
 <tr>
 <td></td>
-<td>X'1D0'</td>
-<td>XL48</td>
+<td>X'0A8'</td>
+<td>XL88</td>
 <td>Reserved</td>
 </tr>
 </tbody>
 </table>
-<p>There are 8 pointer fields in the prefix area. These point to fields allocated elsewhere in the prefix block.
-Their exact addresses on the prefix block may vary.</p>
-<p>The <code>PFXDVOL@</code>, <code>PFXDPAT@</code>, <code>PFXDNAM@</code> pointers and the <code>PFXXVOL@</code>, <code>PFXXPAT@</code>, <code>PFXXNAM@</code> all point to a halfword-prefixed string.
+<p>The component prefix area has the following format:</p>
+<table>
+<thead>
+<tr>
+<th>Label</th>
+<th>Offset</th>
+<th>Field type</th>
+<th>Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ZVSAMCPFX</td>
+<td></td>
+<td>DSECT</td>
+<td>Prefix area</td>
+</tr>
+<tr>
+<td>PFXCEYE</td>
+<td>X'000'</td>
+<td>CL4</td>
+<td>Eye catcher</td>
+</tr>
+<tr>
+<td>PFXCZPFX</td>
+<td></td>
+<td>=C'zPFX'</td>
+<td></td>
+</tr>
+<tr>
+<td>PFXCEYE2</td>
+<td>X'004'</td>
+<td>CL4</td>
+<td>Eye catcher part 2</td>
+</tr>
+<tr>
+<td>PFXCZEXT</td>
+<td></td>
+<td>=C'zEXT'</td>
+<td></td>
+</tr>
+<tr>
+<td>PFXFMET</td>
+<td>X'008'</td>
+<td>XL4</td>
+<td>Nr of entries in entire file map</td>
+</tr>
+<tr>
+<td>PFXRMET</td>
+<td>X'00C'</td>
+<td>XL4</td>
+<td>Nr of entries in entire RRN map</td>
+</tr>
+<tr>
+<td>PFXBMAP</td>
+<td>X'010'</td>
+<td>XL8</td>
+<td>XLRA of first spacemap block</td>
+</tr>
+<tr>
+<td>PFXEMAP</td>
+<td>X'018'</td>
+<td>XL8</td>
+<td>XLRA of last spacemap block</td>
+</tr>
+<tr>
+<td>PFXBDATA</td>
+<td>X'020'</td>
+<td>XL8</td>
+<td>XLRA of first data block</td>
+</tr>
+<tr>
+<td>PFXEDATA</td>
+<td>X'028'</td>
+<td>XL8</td>
+<td>XLRA of last data block</td>
+</tr>
+<tr>
+<td>PFXBOVFL</td>
+<td>X'030'</td>
+<td>XL8</td>
+<td>XLRA of first block on overflow chain</td>
+</tr>
+<tr>
+<td>PFXEOVFL</td>
+<td>X'038'</td>
+<td>XL8</td>
+<td>XLRA of last block on overflow chain</td>
+</tr>
+<tr>
+<td>PFXBSEGM</td>
+<td>X'040'</td>
+<td>XL8</td>
+<td>XLRA of first segment block</td>
+</tr>
+<tr>
+<td>PFXESEGM</td>
+<td>X'048'</td>
+<td>XL8</td>
+<td>XLRA of last segment block</td>
+</tr>
+<tr>
+<td></td>
+<td>X'050'</td>
+<td>XL8</td>
+<td>reserved</td>
+</tr>
+<tr>
+<td>PFXROOT</td>
+<td>X'058'</td>
+<td>XL8</td>
+<td>XLRA of root index block</td>
+</tr>
+<tr>
+<td>PFXBLVL0</td>
+<td>X'060'</td>
+<td>XL8</td>
+<td>XLRA of Header Block index level 0</td>
+</tr>
+<tr>
+<td>PFXELVL0</td>
+<td>X'068'</td>
+<td>XL8</td>
+<td>XLRA of End Block index level 0</td>
+</tr>
+<tr>
+<td>PFXBLVL1</td>
+<td>X'070'</td>
+<td>XL8</td>
+<td>XLRA of Header Block index level 1</td>
+</tr>
+<tr>
+<td>PFXELVL1</td>
+<td>X'078'</td>
+<td>XL8</td>
+<td>XLRA of End Block index level 1</td>
+</tr>
+<tr>
+<td>PFXBLVL2</td>
+<td>X'080'</td>
+<td>XL8</td>
+<td>XLRA of Header Block index level 2</td>
+</tr>
+<tr>
+<td>PFXELVL2</td>
+<td>X'088'</td>
+<td>XL8</td>
+<td>XLRA of End Block index level 2</td>
+</tr>
+<tr>
+<td>PFXBLVL3</td>
+<td>X'090'</td>
+<td>XL8</td>
+<td>XLRA of Header Block index level 3</td>
+</tr>
+<tr>
+<td>PFXELVL3</td>
+<td>X'098'</td>
+<td>XL8</td>
+<td>XLRA of End Block index level 3</td>
+</tr>
+<tr>
+<td>PFXBLVL4</td>
+<td>X'0A0'</td>
+<td>XL8</td>
+<td>XLRA of Header Block index level 4</td>
+</tr>
+<tr>
+<td>PFXELVL4</td>
+<td>X'0A8'</td>
+<td>XL8</td>
+<td>XLRA of End Block index level 4</td>
+</tr>
+<tr>
+<td>PFXBLVL5</td>
+<td>X'0B0'</td>
+<td>XL8</td>
+<td>XLRA of Header Block index level 5</td>
+</tr>
+<tr>
+<td>PFXELVL5</td>
+<td>X'0B8'</td>
+<td>XL8</td>
+<td>XLRA of End Block index level 5</td>
+</tr>
+<tr>
+<td>PFXBLVL6</td>
+<td>X'0C0'</td>
+<td>XL8</td>
+<td>XLRA of Header Block index level 6</td>
+</tr>
+<tr>
+<td>PFXELVL6</td>
+<td>X'0C8'</td>
+<td>XL8</td>
+<td>XLRA of End Block index level 6</td>
+</tr>
+<tr>
+<td>PFXBLVL7</td>
+<td>X'0D0'</td>
+<td>XL8</td>
+<td>XLRA of Header Block index level 7</td>
+</tr>
+<tr>
+<td>PFXELVL7</td>
+<td>X'0D8'</td>
+<td>XL8</td>
+<td>XLRA of End Block index level 7</td>
+</tr>
+<tr>
+<td>PFXBLVL8</td>
+<td>X'0E0'</td>
+<td>XL8</td>
+<td>XLRA of Header Block index level 8</td>
+</tr>
+<tr>
+<td>PFXELVL8</td>
+<td>X'0E8'</td>
+<td>XL8</td>
+<td>XLRA of End Block index level 8</td>
+</tr>
+<tr>
+<td>PFXBLVL9</td>
+<td>X'0F0'</td>
+<td>XL8</td>
+<td>XLRA of Header Block index level 9</td>
+</tr>
+<tr>
+<td>PFXELVL9</td>
+<td>X'0F8'</td>
+<td>XL8</td>
+<td>XLRA of End Block index level 9</td>
+</tr>
+<tr>
+<td>PFXBLVLA</td>
+<td>X'100'</td>
+<td>XL8</td>
+<td>XLRA of Header Block index level 10</td>
+</tr>
+<tr>
+<td>PFXELVLA</td>
+<td>X'108'</td>
+<td>XL8</td>
+<td>XLRA of End Block index level 10</td>
+</tr>
+<tr>
+<td>PFXBLVLB</td>
+<td>X'110'</td>
+<td>XL8</td>
+<td>XLRA of Header Block index level 11</td>
+</tr>
+<tr>
+<td>PFXELVLB</td>
+<td>X'118'</td>
+<td>XL8</td>
+<td>XLRA of End Block index level 11</td>
+</tr>
+<tr>
+<td>PFXBLVLC</td>
+<td>X'120'</td>
+<td>XL8</td>
+<td>XLRA of Header Block index level 12</td>
+</tr>
+<tr>
+<td>PFXELVLC</td>
+<td>X'128'</td>
+<td>XL8</td>
+<td>XLRA of End Block index level 12</td>
+</tr>
+<tr>
+<td>PFXBLVLD</td>
+<td>X'130'</td>
+<td>XL8</td>
+<td>XLRA of Header Block index level 13</td>
+</tr>
+<tr>
+<td>PFXELVLD</td>
+<td>X'138'</td>
+<td>XL8</td>
+<td>XLRA of End Block index level 13</td>
+</tr>
+<tr>
+<td>PFXBLVLE</td>
+<td>X'140'</td>
+<td>XL8</td>
+<td>XLRA of Header Block index level 14</td>
+</tr>
+<tr>
+<td>PFXELVLE</td>
+<td>X'148'</td>
+<td>XL8</td>
+<td>XLRA of End Block index level 14</td>
+</tr>
+<tr>
+<td>PFXBLVLF</td>
+<td>X'150'</td>
+<td>XL8</td>
+<td>XLRA of Header Block index level 15</td>
+</tr>
+<tr>
+<td>PFXELVLF</td>
+<td>X'158'</td>
+<td>XL8</td>
+<td>XLRA of End Block index level 15</td>
+</tr>
+<tr>
+<td></td>
+<td>X'160'</td>
+<td>XL32</td>
+<td>reserved</td>
+</tr>
+</tbody>
+</table>
+<p>There are various pointer fields in the file prefix area.
+All pointer fields are marked with an <code>@</code> at the end of their label.</p>
+<p>These pointer fields point to fields allocated elsewhere in the prefix block, unless they've been set to foxes.
+The exact addresses of the data fields on the prefix block may vary.</p>
+<p>The four <code>PFXxVOL@</code>, <code>PFXxPAT@</code>, <code>PFXxNAM@</code> pointers all point to a halfword-prefixed string.
 On Linux/Unix systems, the UUID is stored (in string format), not the volume label.
-The <code>PFXRM@</code> is valid only for an RRDS data file, and points to the RRN translation table.
+The <code>PFXCPFX@</code> is valid only for the first file of a component; it points to the component prefix area. In all non-first files, the pointer contains foxes.
+The <code>PFXFM@</code> is valid for the first file of a component, and as many more as needed; it points to the file translation table (or a section) or contains foxes to indicate its absence.
+The <code>PFXRM@</code> is valid for the first file of an RRDS data component, and as many more files as needed; it points to the RRN translation table (or a section) or contains foxes to indicate its absence.
 The <code>PFXCTRS@</code> pointer addresses a separate area that holds various counters.
 This area is expected to move into the catalog dataset in a future release.</p>
+<p>Growth of a component may cause new entries to be added to the file table or the RRN table. When needed these tables can be continued
+on the prefix block of the next file. When a new RRN map entry needs to be created, but the remaining free space on all prefix blocks is
+not sufficient, the operation will fail with an error. For a file map entry this cannot occur: the new file's prefix block offers room for growth.</p>
 <h3 id="counters-area">Counters Area</h3>
-<p>The counters area occurs only on the prefix block. Its location can be found by following the prefix area's <code>PFXCTRS@</code> field.</p>
+<p>The counters area occurs only on the prefix block of a component's first file.
+Its location can be found by following the prefix area's <code>PFXCTRS@</code> field.</p>
 <p>Most counter fields, but not all, are maintained in order to be able to satisfy a
 SHOWCB BLK=ACB or TESTCB BLK=ACB request.</p>
 <table>
@@ -7326,7 +7452,7 @@ maintain elements in sequence.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "v1.8.4.4-52-gb5d6b3aa"}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "v1.8.4.4-53-g4eb90f2c"}</script>
     
     
       <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>

@@ -3139,7 +3139,9 @@ Melvyn suggested to check pointers for a value of 'DCBV' in the first four bytes
 Since that would impact the non-VSAM macros for DCB handling, I doubt this is feasible.
 To be investigated and evaluated.</p>
 </blockquote>
-<p>Open logic for ACB handles a single ACB and proceeds as follows:</p>
+<p>Open logic for ACB handles a single ACB and will open the first file of each component that needs to be opened.
+Other files may need to be opened during normal processing. These implied opens follow a different logic path.
+The ACB OPEN for a cluster proceeds as follows:</p>
 <table>
 <thead>
 <tr>
@@ -3540,7 +3542,8 @@ The ddname variable may only contain one dot</p>
 </tbody>
 </table>
 <h2 id="close">Close</h2>
-<p>Upon close the prefix counter field <code>CTRSTMST</code> must be updated.</p>
+<p>Upon close the prefix counter field <code>CTRSTMST</code> must be updated. All open files for the cluster must be closed,
+including files opened as part of the upgrade set (recursively).</p>
 <p>Do we need to include a last-updated timestamp to validate that last update of AIX is not behind the base cluster?</p>
 <p>Close is a lot more complex than you realise, you have to check that there are no outstanding block/record locks.</p>
 <p>include a last-updated timestamp to validate that last update of AIX is not behind the base cluster?</p>
@@ -3761,7 +3764,7 @@ This logic consists of the following elements:</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "v1.8.4.4-52-gb5d6b3aa"}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "v1.8.4.4-53-g4eb90f2c"}</script>
     
     
       <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>

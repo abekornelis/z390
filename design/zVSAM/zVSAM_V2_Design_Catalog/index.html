@@ -3307,7 +3307,7 @@ It holds information on zVSAM clusters only. Sequential datasets cannot be catal
 </tbody>
 </table>
 <p>It does <strong>not</strong> hold runtime state (high-used XLRA, record counts, spacemaps).
-That lives in the prefix and counters areas of each physical file. Those areas
+That lives in the prefix and counters areas of each component's first physical file. Those areas
 are expected to move into a catalog dataset in a future release; see
 <a href="../zVSAM_V2_Design_File_Structure/">File Structure</a>.</p>
 <h2 id="how-a-catalog-is-built">How a catalog is built</h2>
@@ -3373,7 +3373,7 @@ expands <code>DEFINE2</code>.</p>
 <h2 id="what-a-catalog-contains">What a catalog contains</h2>
 <p>The catalog will hold at least:
 - cluster name
-- pointer to index file
+- pointer to index and data components
 - pointers to all related AIX clusters
 - LRECL
 - record type (F, V, FS, VS)
@@ -3418,11 +3418,15 @@ at OPEN from the catalog directory plus the component name:</p>
 <p>V1 used <code>{name}.VES</code>, <code>{name}.VX0</code>, and <code>{name}.VXN</code> and stored those defaults
 in the VCDT. V2 stores a single <code>X'00'</code> when no override is given; OPEN must
 synthesize <code>.DTA</code> / <code>.IDX</code>.</p>
-<blockquote>
-<p>[!NOTE]
-V2 behavior is simple. Maybe too simple. I suggest we look into copying V1 behaviour,
-using the proper extensions we assign to zVSAM V2 physical files.</p>
-</blockquote>
+<p>When additional files need to be allocated to a component, an eight-character decimal number
+is inserted between the file name and extension of the first file (the base file) to distinguish
+the extension files. The base file name never changes, and does not need to have such a number,
+unless it has been explicitly created with a trailing qualifier of eight zero characters.
+The number zero is reserved for the base file. Additional files number from 1 up to 99999999.</p>
+<p>E.g. when a cluster named <code>MYAIX21.DTA</code> is extended, a file <code>MYAIX21.00000001.DTA</code> is added
+to the data component. The index component <code>MYAIX21.IDX</code> remains a single-file component until
+that component, too, runs out of space. It is then - independently of the data component -
+extended with <code>MYAIX21.00000001.IDX</code>.</p>
 <h2 id="define-catalog">DEFINE CATALOG</h2>
 <p>Must be first. Operands:</p>
 <table>
@@ -3627,12 +3631,12 @@ except when in compatability mode. Under noallow, we should mimic VSAM rules.</p
 <tr>
 <td><code>DTADSN=</code></td>
 <td>omitted</td>
-<td>Full host path of the data file. C string addressed by <code>VCLRDTAA</code>.</td>
+<td>Full host path of the first data file. C string addressed by <code>VCLRDTAA</code>.</td>
 </tr>
 <tr>
 <td><code>IDXDSN=</code></td>
 <td>omitted</td>
-<td>Full host path of the index file, addressed by <code>VCLRIDXA</code>. Must not equal <code>DTADSN</code>.</td>
+<td>Full host path of the first index file, addressed by <code>VCLRIDXA</code>. Must not equal <code>DTADSN</code>.</td>
 </tr>
 </tbody>
 </table>
@@ -3738,7 +3742,7 @@ possibly spanned list of base pointers.</p>
 <tr>
 <td><code>DTADSN=</code> / <code>IDXDSN=</code></td>
 <td>omitted</td>
-<td>Overrides for the AIX <code>.DTA</code> / <code>.IDX</code> files.</td>
+<td>Overrides for the AIX <code>.DTA</code> / <code>.IDX</code> first file of each component</td>
 </tr>
 </tbody>
 </table>
@@ -3908,7 +3912,7 @@ with the cluster name so AIX and path pointers can use <code>A(name)</code>.</p>
 <td>See flag table</td>
 </tr>
 <tr>
-<td>18–19</td>
+<td>18</td>
 <td><code>VCLRFLG3/4</code></td>
 <td>XL2</td>
 <td>Reserved (zero)</td>
@@ -4129,7 +4133,7 @@ with the cluster name so AIX and path pointers can use <code>A(name)</code>.</p>
 <td>See flag table</td>
 </tr>
 <tr>
-<td>22–23</td>
+<td>22</td>
 <td></td>
 <td>XL2</td>
 <td>Reserved</td>
@@ -4361,7 +4365,7 @@ for a V2 VCDT.</p>
 <li>Inspect <code>VCDTID</code> and instantiate Java catalog objects from either a V1 or a
    V2 layout.</li>
 <li>Resolve the named cluster or path.</li>
-<li>Derive DTA/IDX paths (override or <code>{dir}{name}.DTA</code> / <code>.IDX</code>).</li>
+<li>Derive DTA/IDX paths (override or <code>{dir}{name}.DTA</code> / <code>.IDX</code>). For first file in a component only.</li>
 <li>Open those files and validate the prefix against the catalog (type, LRECL,
    block size, key offset/length) as described in ACB Processes.</li>
 </ol>
@@ -4473,7 +4477,7 @@ catalog cluster. Planned consequences:</p>
 <ul>
 <li><code>DEFINE</code> / <code>DELETE</code> become runtime operations against that cluster, not an
   assembly step.</li>
-<li>Prefix counters that today sit in the first 4096 bytes of each file can move
+<li>Counters that today sit in the counters area of each component can move
   into catalog records.</li>
 <li>A <code>SYSCAT</code> (or similar) host variable can name the catalog; the ACB DDNAME
   can then name the cluster directly.</li>
@@ -4594,7 +4598,7 @@ this chapter rather than documented as if they were finished behaviour.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "v1.8.4.4-52-gb5d6b3aa"}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "v1.8.4.4-53-g4eb90f2c"}</script>
     
     
       <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>

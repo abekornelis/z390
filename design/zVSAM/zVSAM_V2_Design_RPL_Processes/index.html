@@ -3006,8 +3006,9 @@ component is lengthened.</p>
 <p>Prefix counter field <code>CTRNEXCP</code> needs to be incremented whenever a block needs to be written out. This
 occurs when the cluster was opened with <code>MACRF=NDF</code>. With <code>MACRF=DFR</code> no writes are forced and no
 EXCP needs to be counted.</p>
-<p>When a file can no longer be extended a secondary file needs to be allocated. When that is done transparently,
-<code>CTRNEXT</code> needs to be incremented. Setting its initial value is a function of zRepro.</p>
+<p>When a file can no longer be extended a secondary file needs to be allocated. That is done transparently,
+the new file is allocated, initialized, and chained to the previous-last file. Additional housekeeping is
+performed, including an increment of <code>CTRNEXT</code>. Setting the initial value of <code>CTRNEXT</code> is a function of zRepro.</p>
 <p>Prefix counter fields <code>CTRNINSR</code> and <code>CTRNLOGR</code> need to be incremented whenever a new record is added
 to the component.</p>
 <p>Prefix counter field <code>CTRNRETR</code> needs to be incremented for every block accessed, whether it needs to be
@@ -3125,7 +3126,7 @@ reside in a buffer.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "v1.8.4.4-52-gb5d6b3aa"}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "v1.8.4.4-53-g4eb90f2c"}</script>
     
     
       <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>

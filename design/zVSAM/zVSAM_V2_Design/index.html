@@ -2905,6 +2905,10 @@ to the extent that the following acronyms and terms are understood:</p>
 <td>Control Block Modification Request</td>
 </tr>
 <tr>
+<td>CA</td>
+<td>Control Area</td>
+</tr>
+<tr>
 <td>CI</td>
 <td>Control Interval</td>
 </tr>
@@ -3014,19 +3018,19 @@ The ones that are used by IBM as well, are intended to have the same meaning the
 </tr>
 <tr>
 <td>Cluster</td>
-<td>a set of files that logically belong together</td>
+<td>a component (ESDS, RRDS, LDS) or a set of components (KSDS, AIX) that logically belong together</td>
 </tr>
 <tr>
 <td>Component</td>
-<td>either a data component or an index component of a cluster</td>
+<td>either a data component or an index component of a cluster, consists of 1 or more Files</td>
 </tr>
 <tr>
 <td>Element</td>
-<td>a primary key, RRN, or XLRA in an AIX record</td>
+<td>a primary key (KSDS), RRN (RRDS), or XLRA (any cluster type) uniquely identifying a record</td>
 </tr>
 <tr>
 <td>File</td>
-<td>a single file as seen by the hosting operating system</td>
+<td>a single file as seen by the hosting operating system, the closest thing in z390 to a Control Area</td>
 </tr>
 <tr>
 <td>Foxes</td>
@@ -3185,7 +3189,7 @@ inconvenience this may cause.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "v1.8.4.4-52-gb5d6b3aa"}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "v1.8.4.4-53-g4eb90f2c"}</script>
     
     
       <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>

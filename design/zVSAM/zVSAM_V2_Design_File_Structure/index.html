@@ -3010,6 +3010,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#file-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File map
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#rrn-map" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3723,6 +3734,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#file-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File map
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#rrn-map" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3848,18 +3870,195 @@
 
 <h1 id="zvsam-v2-physical-structure-of-the-files">zVSAM V2 - Physical structure of the files</h1>
 <p>This document describes the file structures for implementing zVSAM V2 data sets.</p>
+<table>
+<thead>
+<tr>
+<th>Chapter 1 - <a href="#basic-concepts">Basic Concepts</a></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="#files-blocks-records">Files, Blocks, Records</a></td>
+</tr>
+<tr>
+<td><a href="#data-and-indexes">Data and Indexes</a></td>
+</tr>
+<tr>
+<td><a href="#cluster-types-and-cluster-components">Cluster types and Cluster Components</a></td>
+</tr>
+<tr>
+<td><a href="#record-formats">Record Formats</a></td>
+</tr>
+<tr>
+<td><a href="#concept-of-fixed-length-records-stored-in-blocks">Concept of Fixed-length records stored in blocks</a></td>
+</tr>
+<tr>
+<td><a href="#concept-of-fixed-length-segmented-records-stored-in-blocks">Concept of Fixed-length Segmented records stored in blocks</a></td>
+</tr>
+<tr>
+<td><a href="#concept-of-variable-length-records-stored-in-blocks">Concept of Variable-length records stored in blocks</a></td>
+</tr>
+<tr>
+<td><a href="#concept-of-variable-length-segmented-records-stored-in-blocks">Concept of Variable-length Segmented records stored in blocks</a></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Chapter 2 - <a href="#file-structure">File Structure</a></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="#physical-files">Physical files</a></td>
+</tr>
+<tr>
+<td><a href="#structure-of-physical-files">Structure of physical files</a></td>
+</tr>
+<tr>
+<td><a href="#components-of-a-block">Components of a Block</a></td>
+</tr>
+<tr>
+<td><a href="#esds-data-organization">ESDS Data Organization</a></td>
+</tr>
+<tr>
+<td><a href="#data-block-chain-organization-for-unspanned-records">Data Block Chain Organization for unspanned records</a></td>
+</tr>
+<tr>
+<td><a href="#data-block-chain-organization-for-spanned-records">Data Block Chain Organization for spanned records</a></td>
+</tr>
+<tr>
+<td><a href="#ksds-data-organization">KSDS Data Organization</a></td>
+</tr>
+<tr>
+<td><a href="#ksds-index-organization">KSDS Index Organization</a></td>
+</tr>
+<tr>
+<td><a href="#rrds-data-organization">RRDS Data Organization</a></td>
+</tr>
+<tr>
+<td><a href="#aix-data-organization">AIX Data Organization</a></td>
+</tr>
+<tr>
+<td><a href="#aix-index-organization">AIX Index Organization</a></td>
+</tr>
+<tr>
+<td><a href="#lds-data-organization">LDS Data Organization</a></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Cluster type</th>
+<th>Fixed non-Spanned</th>
+<th>Fixed Spanned</th>
+<th>Variable non-Spanned</th>
+<th>Variable Spanned</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ESDS</td>
+<td><a href="#esds-fixed-non-spanned">ESDS-F</a></td>
+<td><a href="#esds-fixed-spanned">ESDS-FS</a></td>
+<td><a href="#esds-variable-non-spanned">ESDS-V</a></td>
+<td><a href="#esds-variable-spanned">ESDS-VS</a></td>
+</tr>
+<tr>
+<td>KSDS</td>
+<td><a href="#ksds-fixed-non-spanned">KSDS-F</a></td>
+<td><a href="#ksds-fixed-spanned">KSDS-FS</a></td>
+<td><a href="#ksds-variable-non-spanned">KSDS-V</a></td>
+<td><a href="#ksds-variable-spanned">KSDS-VS</a></td>
+</tr>
+<tr>
+<td>RRDS</td>
+<td><a href="#rrds-fixed-non-spanned">RRDS-F</a></td>
+<td><a href="#rrds-fixed-spanned">RRDS-FS</a></td>
+<td><a href="#rrds-variable-non-spanned">RRDS-V</a></td>
+<td><a href="#rrds-variable-spanned">RRDS-VS</a></td>
+</tr>
+<tr>
+<td>AIX</td>
+<td><a href="#aix-unique">AIX Unique</a></td>
+<td>--</td>
+<td><a href="#aix-non-unique">AIX Non-unique</a></td>
+<td>--</td>
+</tr>
+<tr>
+<td>LDS</td>
+<td><a href="#lds-blocks">LDS Blocks</a></td>
+<td>--</td>
+<td>--</td>
+<td>--</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Chapter 3 - <a href="#block-structures">Block Structures</a></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="#block-header">Block Header</a></td>
+</tr>
+<tr>
+<td><a href="#block-footer">Block Footer</a></td>
+</tr>
+<tr>
+<td><a href="#prefix-area">Prefix Area</a></td>
+</tr>
+<tr>
+<td><a href="#counters-area">Counters Area</a></td>
+</tr>
+<tr>
+<td><a href="#file-map">File map</a></td>
+</tr>
+<tr>
+<td><a href="#rrn-map">RRN map</a></td>
+</tr>
+<tr>
+<td><a href="#spacemap">Spacemap</a></td>
+</tr>
+<tr>
+<td><a href="#data-blocks">Data blocks</a></td>
+</tr>
+<tr>
+<td><a href="#record-pointer-list">Record Pointer List</a></td>
+</tr>
+<tr>
+<td><a href="#index-blocks">Index Blocks</a></td>
+</tr>
+<tr>
+<td><a href="#free-space">Free Space</a></td>
+</tr>
+<tr>
+<td><a href="#xlra">XLRA</a></td>
+</tr>
+<tr>
+<td><a href="#spx">SPX</a></td>
+</tr>
+<tr>
+<td><a href="#rlf">RLF</a></td>
+</tr>
+</tbody>
+</table>
 <h2 id="basic-concepts">Basic Concepts</h2>
 <h3 id="files-blocks-records">Files, Blocks, Records</h3>
 <p>The logical unit of access or storage is the record. Yet the unit for any given I/O operation is the Block.
 Block sizes may vary from 512 bytes to 16MB. By default, each block holds up to 255 records. For any given cluster
 component, choosing an appropriate block size is important. Block size can greatly affect not only
 performance, but also both internal and external storage consumption.</p>
-<p>Every Block and every Record in the file has an XLRA that uniquely identifies it.</p>
-<p>Blocks can be chained. Each cluster holds a number of chains. Each chain is a double-linked list
+<p>With the exception of Prefix blocks, every Block and every Record in the file has an XLRA that uniquely identifies it.</p>
+<p>Blocks can be chained. Each component holds a number of chains. Each chain is a double-linked list
 connecting blocks of the same type. The chain defines the logical sequence of the blocks.</p>
-<p>A cluster consists of one or more files that belong together and should be managed together. Whether you
-take a backup, perform a restore, or perform other administrative tasks, the files that make up a cluster should
-be managed alike. When creating a backup copy of a cluster or restoring a cluster, make sure no other
+<p>A cluster consists of one or two components, each having one or more files that belong together and should be managed together.
+Whether you take a backup, perform a restore, or perform other administrative tasks, all the files that make up a cluster's
+components should be managed alike. When creating a backup copy of a cluster or restoring a cluster, make sure no other
 processes try to access the data at the same time.</p>
 <p>zVSAM implements a number of checks and balances to prevent inadvertent access to data that may have
 been compromised. Names and locations of files are managed. Tampering with files or file attributes may
@@ -4137,20 +4336,22 @@ the file, or how a single record might occupy multiple blocks of the file:</p>
 <h3 id="physical-files">Physical files</h3>
 <p>All zVSAM data is stored in physical files, as defined to the operating system.
 Each component consists of one or more files. The files are formatted as zVSAM files, the structure of which is
-explained in the next set of chapters.</p>
+explained in the next set of chapters. Files in a component are on a double-linked list, chained by volume or UUID, path and name.</p>
 <blockquote>
 <p>[!NOTE]
 the hosting operating system may impose a limit on physical file size and not every host OS
-supports a physical file spanning a volume boundary of the storage device(s). Therefore, to support clusters
-that exceed the maximum size of a single physical file, zVSAM is designed to support clusters that consist of multiple files.</p>
+supports physical files spanning a volume boundary of the storage device(s). Therefore, to support components
+that exceed the maximum size of a single physical file, zVSAM is designed to support components that consist
+of multiple files. Files are created by zVSAM as needed when the component grows.</p>
 </blockquote>
 <h3 id="structure-of-physical-files">Structure of physical files</h3>
 <p>Every zVSAM file has a block size. The block being the basic unit of I/O.
-The first block of every file is the prefix block, which is always 4096 bytes in size.
-The prefix block holds information about the cluster, its data, and its structure.</p>
-<p>Data in the prefix block are not accessible to user programs.
-However, selected fields in the prefix block can be queried using a <code>SHOWCB ACB=</code> request.</p>
-<p>All other blocks in the file have a user-defined blocksize. That is, the user defines the blocksize:
+The first block of every file is a prefix block, which is always 4096 bytes in size.
+The prefix block of each file holds meta-data about that file. The prefix block of the first file
+holds additional meta-data about the entire component.</p>
+<p>Data in the prefix blocks are not accessible to user programs.
+However, selected fields in the component prefix area can be queried using a <code>SHOWCB ACB=</code> request.</p>
+<p>All other blocks in the files have a user-defined blocksize. That is, the user defines the blocksize:
 <code>DATABLOCKSIZE=</code> for blocks in a data component and <code>INDEXBLOCKSIZE=</code> for blocks in an index component.
 All blocks in the file are created with that size, except the prefix block which is always 4096 bytes,
 irrespective of the size of the other blocks in the file.
@@ -4169,7 +4370,15 @@ The file is assumed to logically begin with the first block after the prefix blo
 a block body and a block footer. The block header and footer have a fixed structure.
 The content of the block body differs by block type.</p>
 <ol>
-<li>for a Prefix block, the block body contains the prefix area, the counters area, and possibly a RRN translation map and free space</li>
+<li>for a Prefix block, the block body contains:<ol>
+<li>the file prefix area (every file)</li>
+<li>the component prefix area (first file only)</li>
+<li>the file map (first file only as long as it fits, extends onto prefix block of subsequent files as needed)</li>
+<li>the counters area (first file only)</li>
+<li>the RRN translation map (first file only as long as it fits, extends onto prefix block of subsequent files as needed)</li>
+<li>free space (if any)</li>
+</ol>
+</li>
 <li>for a Spacemap block, the block body contains the spacemap data</li>
 <li>for a Data block, the block body contains a variable-length list of record pointers, data records, and possibly free space</li>
 <li>for a Segment block, the block body contains a single Segment and possibly free space</li>
@@ -4277,8 +4486,10 @@ Each of the 7 block types is explained in more detail below.</p>
 5. Raw blocks are not on any chain. The blocks have neither header nor footer.
    Raw blocks exist from block nr 0 up to the high-allocated XLRA registered in the prefix block (<code>PFXHXLRA</code>).</p>
 </blockquote>
-<p>The following table summarizes the way that blocks in the file are chained from the prefix block.
-Please note that the Prefix block does not reside on any chain.</p>
+<p>The following table summarizes the way that blocks in the file are chained from the prefix block in a component's
+first file. The chains cross file boundaries - there can be only one chain of each type in any component,
+irrespective of its number of files.</p>
+<p>Please note that the Prefix block does not reside on any chain.</p>
 <table>
 <thead>
 <tr>
@@ -4339,7 +4550,7 @@ Please note that the Prefix block does not reside on any chain.</p>
 </tr>
 </tbody>
 </table>
-<p>The spacemap chain is an ordered chain - when a file grows and needs an additional
+<p>The spacemap chain is an ordered chain - when the last file of a component grows and needs an additional
 spacemap block, that block is inserted at the end of the chain.</p>
 <p>Data blocks normally reside on the data chain, which is an ordered chain that
 defines the logical sequence of blocks within the cluster.</p>
@@ -4378,7 +4589,8 @@ When an allocated block is freed, it is removed from its chain. Raw blocks canno
 - a Record Pointer List
 - data records
 - free space</p>
-<p>All Blocks (except Prefix Block, Free Blocks and Raw Blocks) are chained into a chain which is anchored in the Prefix Block.
+<p>All Blocks (except Prefix Block, Free Blocks and Raw Blocks) are chained into a chain which is anchored
+in the component prefix area, which is located in the Prefix Block of the component's first file.
 The type of Block determines on which chain it resides:
 - Spacemap Chain
 - Data Chain (data blocks only, not segment blocks)
@@ -4463,7 +4675,17 @@ Every Block (except Raw Blocks) also has a footer, which mainly serves to guard 
 <td>N</td>
 </tr>
 <tr>
-<td>Prefix Area</td>
+<td>Component Prefix Area</td>
+<td>Y</td>
+<td>N</td>
+<td>N</td>
+<td>N</td>
+<td>N</td>
+<td>N</td>
+<td>N</td>
+</tr>
+<tr>
+<td>File Prefix Area</td>
 <td>Y</td>
 <td>N</td>
 <td>N</td>
@@ -4474,6 +4696,16 @@ Every Block (except Raw Blocks) also has a footer, which mainly serves to guard 
 </tr>
 <tr>
 <td>Counters Area</td>
+<td>Y</td>
+<td>N</td>
+<td>N</td>
+<td>N</td>
+<td>N</td>
+<td>N</td>
+<td>N</td>
+</tr>
+<tr>
+<td>File map</td>
 <td>Y</td>
 <td>N</td>
 <td>N</td>
@@ -4506,7 +4738,7 @@ Every Block (except Raw Blocks) also has a footer, which mainly serves to guard 
 </table>
 <p>Notes:
 1. <code>Opt</code> indicates that Free Space is an optional element on the indicated block type.
-2. An RRN map is present in the Prefix Block of a RRDS cluster only.
+2. An RRN map is present in the first file's Prefix Block of a RRDS cluster only.
 3. The record data area may contain records and Displaced Record Pointers.</p>
 <p>Displaced Record Pointers may be created:
 - when a record is lengthened such that it no longer fits on the block
@@ -4514,10 +4746,10 @@ Every Block (except Raw Blocks) also has a footer, which mainly serves to guard 
 - when a KSDS block needs to be split, zVSAM decides whether to create Displaced Record Pointers,
   or to assign changed XLRA values to the records being moved to another block.</p>
 <h3 id="esds-data-organization">ESDS Data Organization</h3>
-<p>An ESDS consists of a Prefix block and a Spacemap block followed by Data blocks and Segment blocks as needed.
-When the file grows additional Spacemap blocks are added when needed. Not only block transitions, but also
+<p>Each file in an ESDS consists of a Prefix block and a Spacemap block followed by Data blocks and Segment blocks as needed.
+When the last file grows additional Spacemap blocks are added when needed. Not only block transitions, but also
 the presence of additional Spacemap blocks cause gaps in the XLRA sequence.</p>
-<p>Segment blocks and Free blocks are not required, but may be present in the file.</p>
+<p>Segment blocks and Free blocks are not required, but may be present in the file(s).</p>
 <p>Although records in an ESDS are written sequentially, an overflow data block can be created when:
 - an update lengthens a variable-length record to exceed block capacity. The excess data is placed on an overflow data block.</p>
 <p>Segment blocks are created when:
@@ -4556,10 +4788,10 @@ and ends at the block it points to. The location where the arrows attach has no 
 <p><img alt="Diagram showing layout of a Segmented Data Block Chain" src="../img/zVSAM_V2_Chain_Segmented_Data_Blocks.jpg" /></p>
 <p>Note: the structure of the Data Chain and Segment chain is the same for ESDS, KSDS data component, RRDS, and AIX data component.</p>
 <h3 id="ksds-data-organization">KSDS Data Organization</h3>
-<p>A KSDS data component consists of a Prefix block and a Spacemap block followed by Data blocks and Segment blocks as needed.
-When the file grows additional Spacemap blocks are added when needed. Not only block transitions, but also
+<p>Each file in a KSDS data component consists of a Prefix block and a Spacemap block followed by Data blocks and Segment blocks as needed.
+When the last file grows additional Spacemap blocks are added when needed. Not only block transitions, but also
 the presence of additional Spacemap blocks cause gaps in the XLRA sequence.</p>
-<p>Segment blocks and Free blocks are not required, but may be present in the file.</p>
+<p>Segment blocks and Free blocks are not required, but may be present in the file(s).</p>
 <p>Data records are written on the data block where they logically belong. A data block is split when:
 - a record is added that does not fit on the block
 - a variable-length record is updated so that it no longer fits on the block
@@ -4576,9 +4808,9 @@ the presence of additional Spacemap blocks cause gaps in the XLRA sequence.</p>
 Please see <a href="#data-block-chain-organization-for-unspanned-records">Data Block Chain Organization for unspanned records</a>
 and <a href="#data-block-chain-organization-for-spanned-records">Data Block Chain Organization for spanned records</a> above.</p>
 <h3 id="ksds-index-organization">KSDS Index Organization</h3>
-<p>A KSDS index component consists of a Prefix block and a Spacemap block followed by Index blocks.
-When the file grows additional Spacemap blocks are added when needed.</p>
-<p>Free blocks are not required, but may be present in the file.</p>
+<p>Each file in a KSDS index component consists of a Prefix block and a Spacemap block followed by Index blocks.
+When the last file grows additional Spacemap blocks are added when needed.</p>
+<p>Free blocks are not required, but may be present in the file(s).</p>
 <p>Index entries are written on the index block where they logically belong. A KSDS index never contains segment blocks;
 an index must be defined with a block size that is large enough to hold at least 1 index entry in its entirety.</p>
 <p>An index block is split into two index blocks (but never into segments) when:
@@ -4589,10 +4821,10 @@ an index must be defined with a block size that is large enough to hold at least
 <p>The following figure shows a contrived example of how the different types of blocks might sit in the physical file:</p>
 <p><img alt="Diagram showing Blocks in a KSDS Index component" src="../img/zVSAM_V2_File_KSDS_Index.jpg" /></p>
 <h3 id="rrds-data-organization">RRDS Data Organization</h3>
-<p>A RRDS data component consists of a Prefix block and a Spacemap block followed by Data blocks and possibly Segment blocks as needed.
-When the file grows additional Spacemap blocks are added when needed. Not only block transitions, but also
+<p>Each file in a RRDS data component consists of a Prefix block and a Spacemap block followed by Data blocks and possibly Segment blocks as needed.
+When the last file grows additional Spacemap blocks are added when needed. Not only block transitions, but also
 the presence of additional Spacemap blocks and/or Segment blocks cause gaps in the XLRA sequence.</p>
-<p>Segment blocks and Free blocks are not required, but may be present in the file.</p>
+<p>Segment blocks and Free blocks are not required, but may be present in the file(s).</p>
 <p>Data blocks are created when:
 - a record is written with an RRN that exceeds the highest allocated RRN. As many data blocks with empty slots
   are created as needed to create all slots in between the highest allocated RRN and the record to be added.
@@ -4606,7 +4838,7 @@ the presence of additional Spacemap blocks and/or Segment blocks cause gaps in t
 - a segmented record is deleted or shortened enough to require fewer blocks than before the update.
 - the last record on an overflow block is deleted or moved off the overflow block.</p>
 <p>An RRDS block contains slots; each slot corresponds to a unique RRN and a unique XLRA. The relation is maintained
-in the prefix block, which holds a range-based translation table. Slots can either hold a record, or they can be empty.</p>
+in the RRN translation table, which resides in the prefix area of as many files as needed, starting with the first file in the data component. Slots can either hold a record, or they can be empty.</p>
 <p>When a slot is empty:
 - the RPTR still points to the slot, but its <code>RPTR_MTY</code> bit is set on.
 - For V or VS record types, the RLF will still be valid for the slot, with a length of 4 (length of the RLF without record data).
@@ -4693,7 +4925,7 @@ There can never be any free space in the middle of a segment. When an index entr
 <p>Please see <a href="#ksds-index-organization">KSDS Index Organization</a> for a graphical example of how blocks may sit in the file
 and for diagrams showing how the index chains are organized.</p>
 <h3 id="lds-data-organization">LDS Data Organization</h3>
-<p>An LDS consists of a Prefix block and as many Raw blocks as needed.</p>
+<p>Each file in an LDS consists of a Prefix block and as many Raw blocks as needed.</p>
 <p>An LDS contains no spacemap, therefore blocks cannot be freed. Also, raw blocks contain no block headers or footers,
 therefore they cannot be chained. Essentially an LDS has no structure - it is just a long series of sequential blocks
 holding data whose structure is not defined to zVSAM.</p>
@@ -4701,7 +4933,7 @@ holding data whose structure is not defined to zVSAM.</p>
 <p><img alt="Diagram showing Blocks in an LDS" src="../img/zVSAM_V2_File_LDS.jpg" /></p>
 <blockquote>
 <p>[!NOTE]
-The prefix block contains control information for mapping a record's logical address to its XLRA.</p>
+The component prefix area contains control information for mapping a record's logical address to its XLRA.</p>
 </blockquote>
 <h3 id="esds-fixed-non-spanned">ESDS Fixed non-Spanned</h3>
 <p>The records are stored one after another, filling the block until no space is left.
@@ -5925,7 +6157,8 @@ The footer area contains a comparable field: <code>BFTRSEQ#</code>. Together the
 <p><code>BHDRXLVL</code> indicates the index level. Zero is the leaf level. Index blocks are chained by level.
 That is, for every index level in use there is a pair of pointers in the prefix block (<code>PFXBLVLn</code>/<code>PFXELVLn</code>)
 that starts and ends the chain for that level.</p>
-<p><code>BHDRSELF</code> contains the block's own XLRA. This helps to guard against misdirected reads and/or writes.</p>
+<p><code>BHDRSELF</code> contains the block's own XLRA. This helps to guard against misdirected reads and/or writes.
+For the prefix block, this field is set to foxes.</p>
 <p><code>BHDRNEXT</code>/<code>BHDRPREV</code> point to the next and previous block on the chain. Which chain this is, depends
 on the <code>BHDRFLG1</code> setting, and, if this is an index block, by the <code>BHDRXLVL</code> value.
 For the prefix block, these two fields are set to foxes.</p>
@@ -5975,32 +6208,127 @@ It is formatted as follows:</p>
 The header area contains a comparable field: <code>BHDRSEQ#</code>. Together they guard against incomplete writes.</p>
 <h3 id="prefix-area">Prefix Area</h3>
 <p>The prefix block (<code>ZVSAMPFX</code>) consists of the first 4096 bytes of every physical file.
-It contains meta-data defining the file and its attributes. It also contains various counters.</p>
-<p>The prefix block consists of a block header immediately followed by the prefix area.
-The prefix block also contains other data fields; these are addressed from the prefix area.
+It contains meta-data defining the component and its attributes, including various counters. By default most of these data are on the prefix block of the first file; only when needed will they extend onto prefix blocks of subsequent files.</p>
+<p>The prefix block consists of a block header immediately followed by the file prefix area.
+The prefix block also contains other data fields; these are addressed from the file prefix area.
 The prefix block ends with a block footer. A record pointer list is not present on the prefix block.</p>
-<p>There are various pointer fields in the prefix area. These point to fields allocated elsewhere in the prefix block.
+<p>There are various pointer fields in the file prefix area. These point to fields allocated elsewhere in the prefix block.
 Their exact addresses on the prefix block may vary:
-- <code>PFXDPAT@</code>, <code>PFXDNAM@</code>, <code>PFXXPAT@</code>, <code>PFXXNAM@</code> all point to a halfword-prefixed string.
-- <code>PFXDVOL@</code> and <code>PFXXVOL@</code> both point at a halfword-prefixed string that holds either:
+- <code>PFXxPAT@</code>, <code>PFXxNAM@</code> all point to a halfword-prefixed string.
+- <code>PFXxVOL@</code> point at a halfword-prefixed string that holds either:
     - the volume label on Windows systems
     - the UUID (as a string) on Linux/Unix systems</p>
-<p>The <code>PFXCTRS@</code> pointer addresses a separate area that holds various counters.
-The <code>PFXRM@</code> pointer addresses the RRN map if the cluster is a RRDS.</p>
-<p>The Counters area (<code>ZVSAMCTR</code>) directly follows the Prefix area on the Prefix Block, it is doubleword aligned.
-This area is expected to move into the catalog dataset in a future release.
+<ul>
+<li>The <code>PFXCPFX@</code> pointer addresses the cluster prefix area. The cluster prefix area exists only
+  on the first file's prefix area of each component. Foxes otherwise.</li>
+<li>The <code>PFXCTRS@</code> pointer addresses a separate area that holds various counters. The counters area exists only
+  on the first file's prefix area of each component. Foxes otherwise.</li>
+<li>The <code>PFXRM@</code> pointer addresses the RRN map if the cluster is a RRDS. The RRN map exists only
+  on the first file's prefix area of each component. Foxes otherwise.</li>
+<li>The <code>PFXFM@</code> pointer addresses the file map. Foxes otherwise. The file map exists on the first file's prefix area
+  of each component as long as it fits, and is extended onto the prefix block of subsequent files as needed.</li>
+</ul>
+<p>The Counters area (<code>ZVSAMCTR</code>) is expected to move into the catalog dataset in a future release.
 The overall structure of the prefix block would look something like this (areas not to scale):</p>
 <p><img alt="Diagram showing layout of a Prefix Block" src="../img/zVSAM_V2_Block_Type_Prefix.jpg" /></p>
 <p>What the diagram shows:
 - block header and block footer in blue at beginning and end of the block
-- the prefix area, immediately followed by the counters area
+- the file prefix area, immediately followed by the component prefix area and the counters area
 - leftover free space in green
 - other fields addressed from the prefix area
 - elements are not to scale</p>
+<p>What the diagram does not show:
+- the RRN map
+- the file map
+- relation with prefix block in other files</p>
 <p>The addenda part of this document contains more details on the <a href="../zVSAM_V2_Design_Addenda/#prefix-area">prefix area</a>.</p>
 <h3 id="counters-area">Counters Area</h3>
 <p>The addenda part of this document contains more details on the <a href="../zVSAM_V2_Design_Addenda/#counters-area">counters area</a>
 and its maintenance.</p>
+<h3 id="file-map">File map</h3>
+<p>The file map is used to map XLRA ranges to physical files. The purpose is to enable zVSAM to find
+the required file without having to read the chain of files sequentially. The map data duplicates the information in the file chain in order to allow quick access.
+- Each file holds a range of XLRAs - once the next file is opened, the block XLRA of the last block within the file is fixed
+- Each file is represented by a single entry on the file map
+- Each entry contains the starting block XLRA, an ending block XLRA, and the file's volume or UUID, its path, and its name</p>
+<p>The file map entries are formatted as follows:</p>
+<table>
+<thead>
+<tr>
+<th>Label</th>
+<th>Offset</th>
+<th>Field type</th>
+<th>Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ZVSAMFME</td>
+<td></td>
+<td>DSECT</td>
+<td>File map entry</td>
+</tr>
+<tr>
+<td>FMEEYE</td>
+<td>X'000'</td>
+<td>XL4</td>
+<td>Eye Catcher</td>
+</tr>
+<tr>
+<td></td>
+<td>X'004'</td>
+<td>XL4</td>
+<td>reserved</td>
+</tr>
+<tr>
+<td>FMESXLRA</td>
+<td>X'008'</td>
+<td>XL8</td>
+<td>Low XLRA of range</td>
+</tr>
+<tr>
+<td>FMEHXLRA</td>
+<td>X'010'</td>
+<td>XL8</td>
+<td>High XLRA of range</td>
+</tr>
+<tr>
+<td>FMELADDR</td>
+<td>X'018'</td>
+<td>XL8</td>
+<td>Logical address - valid only for LDS</td>
+</tr>
+<tr>
+<td>FMEVOL@</td>
+<td>X'020'</td>
+<td>XL3</td>
+<td>pointer to volume or UUID</td>
+</tr>
+<tr>
+<td>FMEPAT@</td>
+<td>X'023'</td>
+<td>XL3</td>
+<td>pointer to path</td>
+</tr>
+<tr>
+<td>FMENAM@</td>
+<td>X'026'</td>
+<td>XL3</td>
+<td>pointer to name</td>
+</tr>
+<tr>
+<td></td>
+<td>X'029'</td>
+<td>XL7</td>
+<td>reserved</td>
+</tr>
+</tbody>
+</table>
+<p>The prefix area contains:
+- <code>PFXFM@</code> a pointer to the file map, which is a table of file map entries.
+- <code>PFXFME#</code> the number of entries in the table.</p>
+<p>When available space in the prefix page is exhausted, the file map can be continued on the prefix page
+of the next file in the component.</p>
 <h3 id="rrn-map">RRN map</h3>
 <p>The RRN map is used to map RRN ranges to XLRA ranges.
 - Each data block in the RRDS holds a fixed number of record slots
@@ -6024,20 +6352,32 @@ and its maintenance.</p>
 <td>RRN map entry</td>
 </tr>
 <tr>
-<td>RMESXLRA</td>
+<td>RMEEYE</td>
 <td>X'000'</td>
+<td>XL4</td>
+<td>Eye Catcher</td>
+</tr>
+<tr>
+<td></td>
+<td>X'004'</td>
+<td>XL4</td>
+<td>reserved</td>
+</tr>
+<tr>
+<td>RMESXLRA</td>
+<td>X'008'</td>
 <td>XL8</td>
 <td>Low XLRA of range</td>
 </tr>
 <tr>
 <td>RMEHXLRA</td>
-<td>X'008'</td>
+<td>X'010'</td>
 <td>XL8</td>
 <td>High XLRA of range</td>
 </tr>
 <tr>
 <td>RMESRRN</td>
-<td>X'010'</td>
+<td>X'018'</td>
 <td>XL8</td>
 <td>Starting RRN</td>
 </tr>
@@ -6046,6 +6386,10 @@ and its maintenance.</p>
 <p>The prefix area contains:
 - <code>PFXRM@</code> a pointer to the RRN map, which is a table of RRN map entries.
 - <code>PFXRME#</code> the number of entries in the table.</p>
+<p>When available space in the prefix page is exhausted, the RRN map can be continued on the prefix page
+of the next file in the component. When insufficient space can be found, an error is issued when
+a new RRN map entry needs to be created. zVSAM will not create an additional file just to create room
+for an RRN map entry.</p>
 <h3 id="spacemap">Spacemap</h3>
 <p>Spacemap blocks (<code>ZVSAMMAP</code>) are used to manage available free space in a component.
 Each spacemap block has a size that matches the blocksize of all other blocks
@@ -6055,11 +6399,25 @@ including all spacemap blocks but excluding the prefix block. Whenever a single 
 the spacemap blocks are chained together by means of the <code>BHDRNEXT</code>/<code>BHDRPREV</code> pointers in the block header area.
 The spacemap chain starts/ends from the prefix block, fields <code>PFXBMAP</code>/<code>PFXEMAP</code>.</p>
 <p>When a single spacemap block suffices, <code>PFXBMAP</code> and <code>PFXEMAP</code> will both point to that block.</p>
+<p>Each file in the component has its own spacemap blocks. A spacemap block never relates to blocks
+that exist in another file. In other words: the last spacemap block of any file but the last one is valid only up
+to the end of that file. If any bits remain after the bits for the last block in a non-last file,
+those are meaningless and must be set to binary ones to indicate they are unusable.
+For files that are not the last file in the component, the <code>BHDRNEXT</code> pointer
+of the file's last spacemap block will point to the first spacemap block in the component's next file.
+For the <code>BHDRPREV</code> chain the reverse holds true.</p>
 <p>Each spacemap block consists of a block header immediately followed by the spacemap area, which in turn
 is followed directly by the block footer. No free space exists on a spacemap block.</p>
-<p>Thus, the last spacemap block may map blocks that do not exist in the dataset.
-The bit settings for blocks beyond the <code>PFXHXLRA</code> should all be zero to indicate an unallocated block.
+<p>The last spacemap block of the last file of a component may map blocks that do not exist yet in the component, but may still be created when the cluster grows.
+The bit settings for these blocks beyond the <code>PFXHXLRA</code> should all be zero rather than ones to indicate an unallocated block.
 zVSAM is aware that any block beyond <code>PFXHXLRA</code> needs to be created and initialized before it can be allocated.</p>
+<blockquote>
+<p>[!NOTE]
+Blocks beyond <code>PFXHXLRA</code> are never valid. This may occur when a cluster is defined with <code>REUSE=YES</code>.
+Open will then reset <code>PFXHXLRA</code> without rewriting any spacemap pages. Remaining information is regarded as
+if they contained all zeroes, or all ones, depending on whether they refer to a block that might be allocated
+or not (which is the case for virtual blocks that extend beyond available physical size).</p>
+</blockquote>
 <p>The spacemap area is formatted as follows:</p>
 <table>
 <thead>
@@ -6509,7 +6867,7 @@ The four-byte length field sets the maximum size of any record at 4GB.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "v1.8.4.4-52-gb5d6b3aa"}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "v1.8.4.4-53-g4eb90f2c"}</script>
     
     
       <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
