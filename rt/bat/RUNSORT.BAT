@@ -39,6 +39,7 @@ rem and SORT.STA are created in the sort directory
 rem Note: SORT.390 is in linklib, not the sort directory
 call bat\ez390 %z_TraceMode% %sortlib%\SORT %sys390% STATS %1 %2 %3 %4 %5
 set z_ReturnCode=%ERRORLEVEL%
+if exist %sortlib%\SORT1.STA del %sortlib%\SORT1.STA /Q
 rename %sortlib%\SORT.STA SORT1.STA
 if %z_ReturnCode% NEQ 0 (echo %0 ERROR: SORT failure in sort test 1
                          goto return
@@ -60,6 +61,7 @@ set SYSIN=%sortlib%\TESTSRT1.INI
 if exist %SORTOUT% erase %SORTOUT%
 call bat\ez390 %z_TraceMode% %sortlib%\SORT %sys390% STATS %1 %2 %3 %4 %5
 set z_ReturnCode=%ERRORLEVEL%
+if exist %sortlib%\SORT2.STA del %sortlib%\SORT2.STA /Q
 rename %sortlib%\SORT.STA SORT2.STA
 if %z_ReturnCode% NEQ 0 (echo %0 ERROR: SORT failure in sort test 3
                          goto return
@@ -102,6 +104,7 @@ if exist %SORTOUT% erase %SORTOUT%
 set sortparm=PARM(1000) TIME(300)
 call bat\ez390 %z_TraceMode% %sortlib%\SORT %sys390% %sortparm% STATS %1 %2 %3 %4 %5
 set z_ReturnCode=%ERRORLEVEL%
+if exist %sortlib%\SORT3.STA del %sortlib%\SORT3.STA /Q
 rename %sortlib%\SORT.STA SORT3.STA
 if %z_ReturnCode% NEQ 0 (echo %0 ERROR: SORT failure in test 6
                          goto return
