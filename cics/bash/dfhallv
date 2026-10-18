@@ -187,7 +187,7 @@ if [ $rc -ne 0 ]; then wrong; fi
 ########################################
 
 export INFILE=${cicspath}/Z390CAT1.AIXESDS
-export OUTFILE=${cicspath}/MYAIX03.TXT
+export OUTFILE=${cicspath}/MYAIX03.Ebcdic.TXT
 bash/ez390 linklib/REPRO $1
 rc=$?
 if [ $rc -ne 0 ]; then wrong; fi
@@ -257,7 +257,7 @@ if [ $rc -ne 0 ]; then wrong; fi
 ########################################
 
 export INFILE=${cicspath}/Z390CAT1.AIXSURN
-export OUTFILE=${cicspath}/MYAIX01.TXT
+export OUTFILE=${cicspath}/MYAIX01.Ebcdic.TXT
 bash/ez390 linklib/REPRO $1
 rc=$?
 if [ $rc -ne 0 ]; then wrong; fi
@@ -267,7 +267,7 @@ if [ $rc -ne 0 ]; then wrong; fi
 ########################################
 
 export INFILE=${cicspath}/Z390CAT1.AIXNAME
-export OUTFILE=${cicspath}/MYAIX02.TXT
+export OUTFILE=${cicspath}/MYAIX02.Ebcdic.TXT
 bash/ez390 linklib/REPRO $1
 rc=$?
 if [ $rc -ne 0 ]; then wrong; fi
