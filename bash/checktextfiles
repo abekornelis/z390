@@ -8,12 +8,14 @@
 #
 # Zero-byte files are ignored. Every other in-scope file is reported when:
 #
-# * it contains a byte below 0x20 other than CR (0x0D) or LF (0x0A)
+# * it contains a byte below 0x20 other than CR (0x0D), LF (0x0A),
+#   HT (0x09), VT (0x0B), FF (0x0C), DC1 (0x11), or EM (0x19)
 # * it does not end with a line-end marker (CR, LF, or CRLF)
 #
-# CR and LF are the line endings accepted above, so they are not also reported
-# as unexpected control bytes. Every other byte below 0x20 is, including NUL,
-# HT (tab), and SUB (Ctrl-Z). Each hit reports the count and the first offset.
+# CR and LF are the line endings accepted above. HT, VT, FF, DC1, and EM
+# are accepted too, so none of those seven is reported. Every other byte
+# below 0x20 is, including NUL and SUB (Ctrl-Z). Each hit reports the
+# count and the first offset.
 #
 # Tracked paths come from git ls-files. Attribute values come from
 # git check-attr so matching follows Git's .gitattributes rules. System
@@ -258,7 +260,7 @@ while [ "$have_entry" -eq 1 ]; do
                 b = $i + 0
                 n++
                 last = b
-                if (b < 32 && b != 10 && b != 13) {
+                if (b < 32 && b != 9 && b != 10 && b != 11 && b != 12 && b != 13 && b != 17 && b != 25) {
                     cnt[b]++
                     if (cnt[b] == 1) {
                         first[b] = n - 1
@@ -318,7 +320,7 @@ printf 'Skipped %d empty file(s), %d file(s) not marked as text, %d non-regular 
 printf '\n'
 
 if [ ! -s "$tmp/hits" ]; then
-    printf '%s\n' 'Control bytes below 0x20 other than CR (0x0D) and LF (0x0A): none'
+    printf '%s\n' 'Control bytes below 0x20 other than CR, LF, HT, VT, FF, DC1, and EM: none'
 else
     LC_ALL=C sort -t "$sep" -k1,1n -k2,2 "$tmp/hits" > "$tmp/hits.sorted"
     awk -v FS="$sep" '

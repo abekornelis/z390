@@ -7,12 +7,14 @@
 #
 # Zero-byte files are ignored. Every other in-scope file is reported when:
 #
-# * it contains a byte below 0x20 other than CR (0x0D) or LF (0x0A)
+# * it contains a byte below 0x20 other than CR (0x0D), LF (0x0A),
+#   HT (0x09), VT (0x0B), FF (0x0C), DC1 (0x11), or EM (0x19)
 # * it does not end with a line-end marker (CR, LF, or CRLF)
 #
-# CR and LF are the line endings accepted above, so they are not also reported
-# as unexpected control bytes. Every other byte below 0x20 is, including NUL,
-# HT (tab), and SUB (Ctrl-Z). Each hit reports the count and the first offset.
+# CR and LF are the line endings accepted above. HT, VT, FF, DC1, and EM
+# are accepted too, so none of those seven is reported. Every other byte
+# below 0x20 is, including NUL and SUB (Ctrl-Z). Each hit reports the
+# count and the first offset.
 #
 # Tracked paths come from git ls-files. Attribute values come from
 # git check-attr so matching follows Git's .gitattributes rules. System
@@ -62,7 +64,7 @@ namespace Z390.TextCheck
             for (int i = 0; i < data.Length; i++)
             {
                 int v = data[i];
-                if (v >= 0x20 || v == 0x0A || v == 0x0D)
+                if (v >= 0x20 || v == 0x09 || v == 0x0A || v == 0x0B || v == 0x0C || v == 0x0D || v == 0x11 || v == 0x19)
                     continue;
                 if (counts[v] == 0)
                     first[v] = i;
@@ -385,7 +387,7 @@ Write-Out ''
 
 $groups = @($controlHits | Group-Object -Property Value | Sort-Object { [int]$_.Name })
 if ($groups.Count -eq 0) {
-    Write-Out 'Control bytes below 0x20 other than CR (0x0D) and LF (0x0A): none'
+    Write-Out 'Control bytes below 0x20 other than CR, LF, HT, VT, FF, DC1, and EM: none'
 }
 else {
     foreach ($group in $groups) {
