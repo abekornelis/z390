@@ -41,13 +41,13 @@ set SYSUT2=QSAM\TESTVTL.TFV
 call bat\ASMLG %z_TraceMode% QSAM\BLDVTL.MLC TRACE TIME(300) %1 || goto error
 set SYSUT1=QSAM\TESTVTL.TFV
 call bat\ASMLG %z_TraceMode% QSAM\CHKVTL.MLC TRACE TIME(300)    || goto error
-set SYSUT2=QSAM\TESTF.TFV
+set SYSUT2=QSAM\TESTF.Ebcdic.TFV
 call bat\ASMLG %z_TraceMode% QSAM\BLDF.MLC   TRACE TIME(300) %1 || goto error
-set SYSUT1=QSAM\TESTF.TFV
+set SYSUT1=QSAM\TESTF.Ebcdic.TFV
 call bat\ASMLG %z_TraceMode% QSAM\CHKF.MLC   TRACE TIME(300)    || goto error
-set SYSUT2=QSAM\TESTFL.TFV
+set SYSUT2=QSAM\TESTFL.Ebcdic.TFV
 call bat\ASMLG %z_TraceMode% QSAM\BLDFL.MLC  TRACE TIME(300) %1 || goto error
-set SYSUT1=QSAM\TESTFL.TFV
+set SYSUT1=QSAM\TESTFL.Ebcdic.TFV
 call bat\ASMLG %z_TraceMode% QSAM\CHKFL.MLC  TRACE TIME(300)    || goto error
 set SYSUT2=QSAM\TESTFT.TFV
 call bat\ASMLG %z_TraceMode% QSAM\BLDFT.MLC  TRACE TIME(300) %1 || goto error

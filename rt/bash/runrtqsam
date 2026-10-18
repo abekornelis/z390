@@ -61,14 +61,14 @@ bash/asmlg qsam/BLDVTL.MLC trace $1
 export SYSUT1=qsam/TESTVTL.TFV
 bash/asmlg qsam/CHKVTL.MLC trace $1
 
-export SYSUT2=qsam/TESTF.TFV
+export SYSUT2=qsam/TESTF.Ebcdic.TFV
 bash/asmlg qsam/BLDF.MLC trace $1
-export SYSUT1=qsam/TESTF.TFV
+export SYSUT1=qsam/TESTF.Ebcdic.TFV
 bash/asmlg qsam/CHKF.MLC trace $1
 
-export SYSUT2=qsam/TESTFL.TFV
+export SYSUT2=qsam/TESTFL.Ebcdic.TFV
 bash/asmlg qsam/BLDFL.MLC trace $1
-export SYSUT1=qsam/TESTFL.TFV
+export SYSUT1=qsam/TESTFL.Ebcdic.TFV
 bash/asmlg qsam/CHKFL.MLC trace $1
 
 export SYSUT2=qsam/TESTFT.TFV
