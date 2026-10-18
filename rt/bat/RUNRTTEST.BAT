@@ -36,18 +36,18 @@ call bat\ASMLG %z_TraceMode% rt\test\TESTCVB1 notiming stats bal noloadhigh %1 %
 call bat\ASMLG %z_TraceMode% rt\test\TESTCVBG notiming stats bal noloadhigh %1 %2 %3 %4 %5 %6 %7 %8 %9 || goto error
 
 rem  bat\ASMLG %z_TraceMode% rt\test\TESTDCB1 notiming stats bal noloadhigh %1 %2 %3 %4 %5 %6 %7 %8 %9 || goto error -- moved to demo
-set sysut1=rt\test\TESTDCB2.TF1
+set sysut1=rt\test\TESTDCB2.Ebcdic.TF1
 set sysut2=rt\test\TESTDCB2.OUT
 set sysout=rt\test\TESTDCB2.RPT
 call bat\asmlg %z_TraceMode% rt\test\TESTDCB2 notiming stats bal noloadhigh %1 %2 %3 %4 %5 %6 %7 %8 %9 || goto error
-fc rt\test\TESTDCB2.OUT rt\test\TESTDCB2.TF2 > nul || goto error
-fc rt\test\TESTDCB2.RPT rt\test\TESTDCB2.TF3 > nul || goto error
-set sysut1=rt\test\TESTDCB3.TF1
+fc rt\test\TESTDCB2.OUT rt\test\TESTDCB2.Ebcdic.TF2 > nul || goto error
+fc rt\test\TESTDCB2.RPT rt\test\TESTDCB2.Ebcdic.TF3 > nul || goto error
+set sysut1=rt\test\TESTDCB3.Ebcdic.TF1
 set sysut2=rt\test\TESTDCB3.OUT
 set sysout=rt\test\TESTDCB3.RPT
 call bat\asmlg %z_TraceMode% rt\test\TESTDCB3 notiming stats bal noloadhigh %1 %2 %3 %4 %5 %6 %7 %8 %9 || goto error
-fc rt\test\TESTDCB3.OUT rt\test\TESTDCB3.TF1 > nul || goto error
-fc rt\test\TESTDCB3.RPT rt\test\TESTDCB3.TF3 > nul || goto error
+fc rt\test\TESTDCB3.OUT rt\test\TESTDCB3.Ebcdic.TF1 > nul || goto error
+fc rt\test\TESTDCB3.RPT rt\test\TESTDCB3.Ebcdic.TF3 > nul || goto error
 set sysut1=rt\test\TESTDCB4.TF1
 set sysut2=rt\test\TESTDCB4.OUT
 set sysout=rt\test\TESTDCB4.RPT
@@ -72,30 +72,30 @@ set sysout=rt\test\TESTDCB7.RPT
 call bat\asmlg %z_TraceMode% rt\test\TESTDCB7 notiming stats bal noloadhigh %1 %2 %3 %4 %5 %6 %7 %8 %9 || goto error
 fc rt\test\TESTDCB7.OUT rt\test\TESTDCB7.TF2 > nul || goto error
 fc rt\test\TESTDCB7.RPT rt\test\TESTDCB7.TF3 > nul || goto error
-set sysut1=rt\test\TESTDCB8.TF1
+set sysut1=rt\test\TESTDCB8.Ebcdic.TF1
 set sysut2=rt\test\TESTDCB8.OUT
 set sysout=rt\test\TESTDCB8.RPT
 call bat\asmlg %z_TraceMode% rt\test\TESTDCB8 notiming stats bal noloadhigh %1 %2 %3 %4 %5 %6 %7 %8 %9 || goto error
-fc rt\test\TESTDCB8.OUT rt\test\TESTDCB8.TF1 > nul || goto error
-fc rt\test\TESTDCB8.RPT rt\test\TESTDCB8.TF3 > nul || goto error
-set sysut1=rt\test\TESTDCB9.TF1
+fc rt\test\TESTDCB8.OUT rt\test\TESTDCB8.Ebcdic.TF1 > nul || goto error
+fc rt\test\TESTDCB8.RPT rt\test\TESTDCB8.Ebcdic.TF3 > nul || goto error
+set sysut1=rt\test\TESTDCB9.Ebcdic.TF1
 set sysut2=rt\test\TESTDCB9.OUT
 set sysout=rt\test\TESTDCB9.RPT
 call bat\asmlg %z_TraceMode% rt\test\TESTDCB9 notiming stats bal noloadhigh %1 %2 %3 %4 %5 %6 %7 %8 %9 || goto error
-fc rt\test\TESTDCB9.OUT rt\test\TESTDCB9.TF2 > nul || goto error
-fc rt\test\TESTDCB9.RPT rt\test\TESTDCB9.TF3 > nul || goto error
+fc rt\test\TESTDCB9.OUT rt\test\TESTDCB9.Ebcdic.TF2 > nul || goto error
+fc rt\test\TESTDCB9.RPT rt\test\TESTDCB9.Ebcdic.TF3 > nul || goto error
 set sysut1=
 set sysut2=
 set sysout=
 call bat\asmlg %z_TraceMode% rt\test\TESTDCBA notiming stats bal noloadhigh %1 %2 %3 %4 %5 %6 %7 %8 %9 || goto error
 fc rt\test\TESTDCBA.OUT rt\test\TESTDCBA.TF1 > nul || goto error
 fc rt\test\TESTDCBA.RPT rt\test\TESTDCBA.TF3 > nul || goto error
-set sysut1=rt\test\TESTDCBB.TF1
+set sysut1=rt\test\TESTDCBB.Ebcdic.TF1
 set sysut2=rt\test\TESTDCBB.OUT
 set sysout=rt\test\TESTDCBB.RPT
 call bat\asmlg %z_TraceMode% rt\test\TESTDCBB notiming stats bal noloadhigh %1 %2 %3 %4 %5 %6 %7 %8 %9 || goto error
-fc rt\test\TESTDCBB.OUT rt\test\TESTDCBB.TF1 > nul || goto error
-fc rt\test\TESTDCBB.RPT rt\test\TESTDCBB.TF3 > nul || goto error
+fc rt\test\TESTDCBB.OUT rt\test\TESTDCBB.Ebcdic.TF1 > nul || goto error
+fc rt\test\TESTDCBB.RPT rt\test\TESTDCBB.Ebcdic.TF3 > nul || goto error
 set sysut1=
 set sysut2=
 set sysout=
@@ -112,14 +112,14 @@ set sysut1=
 set sysut2=
 set sysout=
 call bat\asmlg %z_TraceMode% rt\test\TESTDCBE notiming stats bal noloadhigh %1 %2 %3 %4 %5 %6 %7 %8 %9 || goto error
-fc rt\test\TESTDCBE.OUT rt\test\TESTDCBE.TF2        > nul || goto error
+fc rt\test\TESTDCBE.OUT rt\test\TESTDCBE.Ebcdic.TF2 > nul || goto error
 fc rt\test\TESTDCBE.RPT rt\test\TESTDCBE.Ebcdic.TF3 > nul || goto error
-set sysut1=rt\test\TESTDCBF.TF1
+set sysut1=rt\test\TESTDCBF.Ebcdic.TF1
 set sysut2=rt\test\TESTDCBF.OUT
 set sysout=rt\test\TESTDCBF.RPT
 call bat\asmlg %z_TraceMode% rt\test\TESTDCBF notiming stats bal noloadhigh %1 %2 %3 %4 %5 %6 %7 %8 %9 || goto error
-fc rt\test\TESTDCBF.OUT rt\test\TESTDCBF.TF2 > nul || goto error
-fc rt\test\TESTDCBF.RPT rt\test\TESTDCBF.TF3 > nul || goto error
+fc rt\test\TESTDCBF.OUT rt\test\TESTDCBF.Ebcdic.TF2 > nul || goto error
+fc rt\test\TESTDCBF.RPT rt\test\TESTDCBF.Ebcdic.TF3 > nul || goto error
 
 
 
