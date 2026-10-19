@@ -30,18 +30,18 @@ bash/asmlg rt/test/TESTCVB1 notiming stats bal noloadhigh
 bash/asmlg rt/test/TESTCVBG notiming stats bal noloadhigh
 
 # TESTDCB1 moved to demo
-export SYSUT1=rt/test/TESTDCB2.Ebcdic.TF1
+export SYSUT1=rt/test/TESTDCB2.TF1
 export SYSUT2=rt/test/TESTDCB2.OUT
 export SYSOUT=rt/test/TESTDCB2.RPT
 bash/asmlg rt/test/TESTDCB2 notiming stats bal noloadhigh
 cmp -s rt/test/TESTDCB2.OUT rt/test/TESTDCB2.Ebcdic.TF2 || exit 1
-tr -d '\r' < rt/test/TESTDCB2.RPT | diff - <(tr -d '\r' < rt/test/TESTDCB2.Ebcdic.TF3) || exit 1
+tr -d '\r' < rt/test/TESTDCB2.RPT | diff - <(tr -d '\r' < rt/test/TESTDCB2.TF3) || exit 1
 export SYSUT1=rt/test/TESTDCB3.Ebcdic.TF1
 export SYSUT2=rt/test/TESTDCB3.OUT
 export SYSOUT=rt/test/TESTDCB3.RPT
 bash/asmlg rt/test/TESTDCB3 notiming stats bal noloadhigh
 cmp -s rt/test/TESTDCB3.OUT rt/test/TESTDCB3.Ebcdic.TF1 || exit 1
-tr -d '\r' < rt/test/TESTDCB3.RPT | diff - <(tr -d '\r' < rt/test/TESTDCB3.Ebcdic.TF3) || exit 1
+tr -d '\r' < rt/test/TESTDCB3.RPT | diff - <(tr -d '\r' < rt/test/TESTDCB3.TF3) || exit 1
 export SYSUT1=rt/test/TESTDCB4.TF1
 export SYSUT2=rt/test/TESTDCB4.OUT
 export SYSOUT=rt/test/TESTDCB4.RPT
@@ -113,7 +113,7 @@ export SYSUT2=rt/test/TESTDCBF.OUT
 export SYSOUT=rt/test/TESTDCBF.RPT
 bash/asmlg rt/test/TESTDCBF notiming stats bal noloadhigh
 cmp -s rt/test/TESTDCBF.OUT rt/test/TESTDCBF.Ebcdic.TF2 || exit 1
-tr -d '\r' < rt/test/TESTDCBF.RPT | diff - <(tr -d '\r' < rt/test/TESTDCBF.Ebcdic.TF3) || exit 1
+tr -d '\r' < rt/test/TESTDCBF.RPT | diff - <(tr -d '\r' < rt/test/TESTDCBF.TF3) || exit 1
 
 
 
