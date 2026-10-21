@@ -10,15 +10,19 @@ if /I "%1" == "tron" (set z_TraceMode=tron
                       )
 set /A z_NestLevel=%z_NestLevel%+1
 rem ----- Lvl(%z_NestLevel%) Start %0 %1 %2 %3 %4 %5 %6 %7 %8 %9
-pushd %~dps0..
+pushd %~dps0..                                       || goto nopush
 
 rem Get version from version.txt
 set /p VERSION=<version.txt                          || goto error
 echo Building z390 %VERSION%
 set DIST_DIR=dist
 
+rem validate java sources
+call bat\RUNLINTER.BAT %z_TraceMode%                 || goto error
+
 rem build jar
-call bat\BLDJAR.BAT %z_TraceMode% %*                 || goto error
+call bat\BLDJAR.BAT   %z_TraceMode% %*               || goto error
+call bat\BLDJVDOC.BAT %z_TraceMode%                  || goto error
 
 rem remove old assembly results
 rem this prevents a standard build from picking up left-over modules
@@ -29,7 +33,7 @@ rem generate HLASM compatible SPM's
 call bat\BLDZSTRMAC.BAT %z_TraceMode% build\zstrmac  || goto error
 
 rem build standard libraries
-call bat\BLDLIB.BAT %z_TraceMode%                    || goto error
+call bat\BLDLIB.BAT    %z_TraceMode%                 || goto error
 call bat\BLDCBLLIB.BAT %z_TraceMode%                 || goto error
 
 if /I %1. NEQ *All. goto Standard_build
@@ -116,10 +120,15 @@ powershell Compress-Archive -Path z390_%VERSION% -DestinationPath z390_%VERSION%
 set z_ReturnCode=0
 goto return
 
+:nopush
+set z_ReturnCode=%ERRORLEVEL%
+echo %0 ERROR: Encountered RC %z_ReturnCode% - exiting
+goto exit
 :error
 set z_ReturnCode=%ERRORLEVEL%
 echo %0 ERROR: Encountered RC %z_ReturnCode% - exiting
 :return
-rem ----- Lvl(%z_NestLevel%) End %0 %1 %2 %3 %4 %5 %6 %7 %8 %9
 popd
+:exit
+rem ----- Lvl(%z_NestLevel%) End %0 %1 %2 %3 %4 %5 %6 %7 %8 %9
 exit /b %z_ReturnCode%
